@@ -73,6 +73,21 @@ func (m *MockUserUsecase) GetUserCount(ctx context.Context) (int, error) {
 	return args.Int(0), args.Error(1)
 }
 
+func (m *MockUserUsecase) ForgotPassword(ctx context.Context, email string) error {
+	args := m.Called(ctx, email)
+	return args.Error(0)
+}
+
+func (m *MockUserUsecase) ResetPassword(ctx context.Context, token, newPassword string) error {
+	args := m.Called(ctx, token, newPassword)
+	return args.Error(0)
+}
+
+func (m *MockUserUsecase) ChangePassword(ctx context.Context, userID int, currentPassword, newPassword string) error {
+	args := m.Called(ctx, userID, currentPassword, newPassword)
+	return args.Error(0)
+}
+
 func TestUserHandler_CreateUser(t *testing.T) {
 	// Setup
 	mockUsecase := new(MockUserUsecase)

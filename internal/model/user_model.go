@@ -7,14 +7,19 @@ import (
 
 // UserModel - Database model (infrastructure concern)
 type UserModel struct {
-	ID        int        `db:"id" json:"id"`
-	Username  string     `db:"username" json:"username"`
-	Email     string     `db:"email" json:"email"`
-	Password  string     `db:"password" json:"-"`
-	Status    string     `db:"status" json:"status"`
-	CreatedAt time.Time  `db:"created_at" json:"created_at"`
-	UpdatedAt time.Time  `db:"updated_at" json:"updated_at"`
-	DeletedAt *time.Time `db:"deleted_at" json:"deleted_at,omitempty"`
+	ID                     int        `db:"id" json:"id"`
+	Username               string     `db:"username" json:"username"`
+	Email                  string     `db:"email" json:"email"`
+	PasswordHash           string     `db:"password_hash" json:"-"`
+	Status                 string     `db:"status" json:"status"`
+	ResetPasswordToken     *string    `db:"reset_password_token" json:"-"`
+	ResetPasswordExpiresAt *time.Time `db:"reset_password_expires_at" json:"-"`
+	CreatedAt              time.Time  `db:"created_at" json:"created_at"`
+	UpdatedAt              time.Time  `db:"updated_at" json:"updated_at"`
+	DeletedAt              *time.Time `db:"deleted_at" json:"deleted_at,omitempty"`
+	CreatedBy              *int       `db:"created_by" json:"created_by,omitempty"`
+	UpdatedBy              *int       `db:"updated_by" json:"updated_by,omitempty"`
+	DeletedBy              *int       `db:"deleted_by" json:"deleted_by,omitempty"`
 }
 
 // UserCreateRequest - DTO for HTTP requests
@@ -30,6 +35,23 @@ type UserUpdateRequest struct {
 	Email    string `json:"email" validate:"omitempty,email"`
 	Password string `json:"password" validate:"omitempty,min=6"`
 	Status   string `json:"status" validate:"omitempty,oneof=active inactive"`
+}
+
+// ForgotPasswordRequest - DTO for forgot password requests
+type ForgotPasswordRequest struct {
+	Email string `json:"email" validate:"required,email"`
+}
+
+// ResetPasswordRequest - DTO for reset password requests
+type ResetPasswordRequest struct {
+	Token       string `json:"token" validate:"required"`
+	NewPassword string `json:"new_password" validate:"required,min=6"`
+}
+
+// ChangePasswordRequest - DTO for change password requests
+type ChangePasswordRequest struct {
+	CurrentPassword string `json:"current_password" validate:"required"`
+	NewPassword     string `json:"new_password" validate:"required,min=6"`
 }
 
 // UserResponse - DTO for HTTP responses
@@ -49,5 +71,20 @@ func (r *UserCreateRequest) Validate() error {
 
 // Validate validates UserUpdateRequest
 func (r *UserUpdateRequest) Validate() error {
+	return validator.ValidateStruct(r)
+}
+
+// Validate validates ForgotPasswordRequest
+func (r *ForgotPasswordRequest) Validate() error {
+	return validator.ValidateStruct(r)
+}
+
+// Validate validates ResetPasswordRequest
+func (r *ResetPasswordRequest) Validate() error {
+	return validator.ValidateStruct(r)
+}
+
+// Validate validates ChangePasswordRequest
+func (r *ChangePasswordRequest) Validate() error {
 	return validator.ValidateStruct(r)
 }

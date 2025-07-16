@@ -39,7 +39,11 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 	user := &entity.User{
 		Username: req.Username,
 		Email:    req.Email,
-		Password: req.Password,
+	}
+
+	// Hash password
+	if err := user.HashPassword(req.Password); err != nil {
+		return response.BadRequest(c, "Password hashing failed", err.Error())
 	}
 
 	// Create user
@@ -158,8 +162,14 @@ func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 		ID:       id,
 		Username: req.Username,
 		Email:    req.Email,
-		Password: req.Password,
 		Status:   req.Status,
+	}
+
+	// Hash password if provided
+	if req.Password != "" {
+		if err := user.HashPassword(req.Password); err != nil {
+			return response.BadRequest(c, "Password hashing failed", err.Error())
+		}
 	}
 
 	// Update user
@@ -198,4 +208,73 @@ func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {
 	}
 
 	return response.Success(c, "User deleted successfully", nil)
+}
+
+// ForgotPassword handles POST /users/forgot-password
+func (h *UserHandler) ForgotPassword(c *fiber.Ctx) error {
+	var req model.ForgotPasswordRequest
+
+	// Parse request body
+	if err := c.BodyParser(&req); err != nil {
+		return response.BadRequest(c, "Invalid request body", err.Error())
+	}
+
+	// Validate request
+	if err := req.Validate(); err != nil {
+		return response.BadRequest(c, "Validation failed", err.Error())
+	}
+
+	// Process forgot password
+	if err := h.userUsecase.ForgotPassword(c.Context(), req.Email); err != nil {
+		return response.InternalServerError(c, "Failed to process forgot password", err.Error())
+	}
+
+	return response.Success(c, "Reset password instructions sent to your email", nil)
+}
+
+// ResetPassword handles POST /users/reset-password
+func (h *UserHandler) ResetPassword(c *fiber.Ctx) error {
+	var req model.ResetPasswordRequest
+
+	// Parse request body
+	if err := c.BodyParser(&req); err != nil {
+		return response.BadRequest(c, "Invalid request body", err.Error())
+	}
+
+	// Validate request
+	if err := req.Validate(); err != nil {
+		return response.BadRequest(c, "Validation failed", err.Error())
+	}
+
+	// Process reset password
+	if err := h.userUsecase.ResetPassword(c.Context(), req.Token, req.NewPassword); err != nil {
+		return response.BadRequest(c, "Reset password failed", err.Error())
+	}
+
+	return response.Success(c, "Password reset successfully", nil)
+}
+
+// ChangePassword handles POST /users/:id/change-password
+func (h *UserHandler) ChangePassword(c *fiber.Ctx) error {
+	id, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return response.BadRequest(c, "Invalid user ID", err.Error())
+	}
+
+	var req model.ChangePasswordRequest
+	if err := c.BodyParser(&req); err != nil {
+		return response.BadRequest(c, "Invalid request body", err.Error())
+	}
+
+	// Validate request
+	if err := req.Validate(); err != nil {
+		return response.BadRequest(c, "Validation failed", err.Error())
+	}
+
+	// Process change password
+	if err := h.userUsecase.ChangePassword(c.Context(), id, req.CurrentPassword, req.NewPassword); err != nil {
+		return response.BadRequest(c, "Change password failed", err.Error())
+	}
+
+	return response.Success(c, "Password changed successfully", nil)
 }

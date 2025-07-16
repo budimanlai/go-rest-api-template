@@ -15,4 +15,7 @@ type UserUsecase interface {
 	DeleteUser(ctx context.Context, id int) error
 	GetAllUsers(ctx context.Context, limit, offset int) ([]*entity.User, error)
 	GetUserCount(ctx context.Context) (int, error)
+	ForgotPassword(ctx context.Context, email string) error
+	ResetPassword(ctx context.Context, token, newPassword string) error
+	ChangePassword(ctx context.Context, userID int, currentPassword, newPassword string) error
 }
