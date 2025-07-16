@@ -1,6 +1,9 @@
 package model
 
-import "time"
+import (
+	"go-rest-api-template/pkg/validator"
+	"time"
+)
 
 // UserModel - Database model (infrastructure concern)
 type UserModel struct {
@@ -21,6 +24,14 @@ type UserCreateRequest struct {
 	Password string `json:"password" validate:"required,min=6"`
 }
 
+// UserUpdateRequest - DTO for HTTP update requests
+type UserUpdateRequest struct {
+	Username string `json:"username" validate:"omitempty,min=3,max=50"`
+	Email    string `json:"email" validate:"omitempty,email"`
+	Password string `json:"password" validate:"omitempty,min=6"`
+	Status   string `json:"status" validate:"omitempty,oneof=active inactive"`
+}
+
 // UserResponse - DTO for HTTP responses
 type UserResponse struct {
 	ID        int       `json:"id"`
@@ -28,4 +39,15 @@ type UserResponse struct {
 	Email     string    `json:"email"`
 	Status    string    `json:"status"`
 	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+// Validate validates UserCreateRequest
+func (r *UserCreateRequest) Validate() error {
+	return validator.ValidateStruct(r)
+}
+
+// Validate validates UserUpdateRequest
+func (r *UserUpdateRequest) Validate() error {
+	return validator.ValidateStruct(r)
 }

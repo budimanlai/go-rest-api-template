@@ -53,3 +53,11 @@ func FormatValidationErrorString(err error) string {
 	errors := FormatValidationError(err)
 	return strings.Join(errors, ", ")
 }
+
+// Global validator instance
+var globalValidator = New()
+
+// ValidateStruct validates a struct using global validator
+func ValidateStruct(i interface{}) error {
+	return globalValidator.Validate(i)
+}

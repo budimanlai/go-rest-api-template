@@ -60,3 +60,46 @@ func SendPaginated(c *fiber.Ctx, message string, data interface{}, pagination Pa
 		Pagination: pagination,
 	})
 }
+
+// Helper functions for common HTTP responses
+
+// Success sends 200 OK response
+func Success(c *fiber.Ctx, message string, data interface{}) error {
+	return SendSuccess(c, message, data)
+}
+
+// Created sends 201 Created response
+func Created(c *fiber.Ctx, message string, data interface{}) error {
+	return c.Status(fiber.StatusCreated).JSON(StandardResponse{
+		Success: true,
+		Message: message,
+		Data:    data,
+	})
+}
+
+// BadRequest sends 400 Bad Request response
+func BadRequest(c *fiber.Ctx, message string, err string) error {
+	return c.Status(fiber.StatusBadRequest).JSON(StandardResponse{
+		Success: false,
+		Message: message,
+		Error:   err,
+	})
+}
+
+// NotFound sends 404 Not Found response
+func NotFound(c *fiber.Ctx, message string, err string) error {
+	return c.Status(fiber.StatusNotFound).JSON(StandardResponse{
+		Success: false,
+		Message: message,
+		Error:   err,
+	})
+}
+
+// InternalServerError sends 500 Internal Server Error response
+func InternalServerError(c *fiber.Ctx, message string, err string) error {
+	return c.Status(fiber.StatusInternalServerError).JSON(StandardResponse{
+		Success: false,
+		Message: message,
+		Error:   err,
+	})
+}
