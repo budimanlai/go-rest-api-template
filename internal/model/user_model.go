@@ -22,36 +22,36 @@ type UserModel struct {
 	DeletedBy              *int       `db:"deleted_by" json:"deleted_by,omitempty"`
 }
 
-// UserCreateRequest - DTO for HTTP requests
+// UserCreateRequest - DTO for HTTP requests with comprehensive validation
 type UserCreateRequest struct {
-	Username string `json:"username" validate:"required,min=3,max=50"`
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=6"`
+	Username string `json:"username" validate:"required,min=3,max=50,alphanum"`
+	Email    string `json:"email" validate:"required,email,max=100"`
+	Password string `json:"password" validate:"required,min=8,max=100"`
 }
 
 // UserUpdateRequest - DTO for HTTP update requests
 type UserUpdateRequest struct {
-	Username string `json:"username" validate:"omitempty,min=3,max=50"`
-	Email    string `json:"email" validate:"omitempty,email"`
-	Password string `json:"password" validate:"omitempty,min=6"`
-	Status   string `json:"status" validate:"omitempty,oneof=active inactive"`
+	Username string `json:"username" validate:"omitempty,min=3,max=50,alphanum"`
+	Email    string `json:"email" validate:"omitempty,email,max=100"`
+	Password string `json:"password" validate:"omitempty,min=8,max=100"`
+	Status   string `json:"status" validate:"omitempty,oneof=active inactive suspended"`
 }
 
 // ForgotPasswordRequest - DTO for forgot password requests
 type ForgotPasswordRequest struct {
-	Email string `json:"email" validate:"required,email"`
+	Email string `json:"email" validate:"required,email,max=100"`
 }
 
 // ResetPasswordRequest - DTO for reset password requests
 type ResetPasswordRequest struct {
-	Token       string `json:"token" validate:"required"`
-	NewPassword string `json:"new_password" validate:"required,min=6"`
+	Token       string `json:"token" validate:"required,min=1,max=255"`
+	NewPassword string `json:"new_password" validate:"required,min=8,max=100"`
 }
 
 // ChangePasswordRequest - DTO for change password requests
 type ChangePasswordRequest struct {
-	CurrentPassword string `json:"current_password" validate:"required"`
-	NewPassword     string `json:"new_password" validate:"required,min=6"`
+	CurrentPassword string `json:"current_password" validate:"required,min=1"`
+	NewPassword     string `json:"new_password" validate:"required,min=8,max=100,nefield=CurrentPassword"`
 }
 
 // UserResponse - DTO for HTTP responses
