@@ -5,6 +5,7 @@ import (
 	"go-rest-api-template/internal/service"
 	"go-rest-api-template/pkg/response"
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -73,13 +74,11 @@ func ApiKeyMiddleware(apiKeyService service.ApiKeyService, responseHelper *respo
 		c.Locals("api_key_name", apiKeyEntity.Name)
 		c.Locals("api_key_h2h", apiKeyEntity.IsH2HEnabled())
 
-		// Log API key access (async)
+		// Log API key access (async with timeout)
 		go func() {
-			if responseHelper != nil {
-				_ = apiKeyService.LogApiKeyAccess(context.Background(), apiKeyEntity.ID)
-			} else {
-				_ = apiKeyService.LogApiKeyAccess(context.Background(), apiKeyEntity.ID)
-			}
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			_ = apiKeyService.LogApiKeyAccess(ctx, apiKeyEntity.ID)
 		}()
 
 		return c.Next()
@@ -129,9 +128,11 @@ func AuthKeyMiddleware(apiKeyService service.ApiKeyService, responseHelper *resp
 		c.Locals("api_key_name", apiKeyEntity.Name)
 		c.Locals("api_key_h2h", apiKeyEntity.IsH2HEnabled())
 
-		// Log access
+		// Log access (async with timeout)
 		go func() {
-			_ = apiKeyService.LogApiKeyAccess(context.Background(), apiKeyEntity.ID)
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			_ = apiKeyService.LogApiKeyAccess(ctx, apiKeyEntity.ID)
 		}()
 
 		return c.Next()

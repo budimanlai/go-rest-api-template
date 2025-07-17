@@ -5,6 +5,7 @@ import (
 	"go-rest-api-template/internal/service"
 	"go-rest-api-template/pkg/response"
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -76,9 +77,11 @@ func PublicMiddleware(apiKeyService service.ApiKeyService, jwtService service.JW
 			c.Locals("token_valid", false)
 		}
 
-		// Log API key access (async)
+		// Log API key access (async with timeout)
 		go func() {
-			_ = apiKeyService.LogApiKeyAccess(context.Background(), apiKeyEntity.ID)
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			_ = apiKeyService.LogApiKeyAccess(ctx, apiKeyEntity.ID)
 		}()
 
 		return c.Next()
@@ -144,9 +147,11 @@ func PrivateMiddleware(apiKeyService service.ApiKeyService, jwtService service.J
 		c.Locals("user_email", claims.Email)
 		c.Locals("user", user)
 
-		// Log API key access (async)
+		// Log API key access (async with timeout)
 		go func() {
-			_ = apiKeyService.LogApiKeyAccess(context.Background(), apiKeyEntity.ID)
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			_ = apiKeyService.LogApiKeyAccess(ctx, apiKeyEntity.ID)
 		}()
 
 		return c.Next()
@@ -215,9 +220,11 @@ func OptionalPrivateJWTMiddleware(apiKeyService service.ApiKeyService, jwtServic
 			c.Locals("authenticated", false)
 		}
 
-		// Log API key access (async)
+		// Log API key access (async with timeout)
 		go func() {
-			_ = apiKeyService.LogApiKeyAccess(context.Background(), apiKeyEntity.ID)
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			_ = apiKeyService.LogApiKeyAccess(ctx, apiKeyEntity.ID)
 		}()
 
 		return c.Next()
