@@ -1,142 +1,228 @@
 #!/bin/bash
 
-# Manual API Testing Script
-# This script helps you test the JWT system manually
+# Manual Testing Guide for Go REST API with ApiKeyOnlyMiddleware
+# Following industry best practices (Strapi, GitHub, Twitter/X approach)
 
-echo "🔧 Manual API Testing Script for JWT System"
-echo "=========================================="
+BASE_URL="http://localhost:3000"
+API_KEY="test-api-key-12345"
 
-# Configuration
-API_KEY="your-api-key-here"
-BASE_URL="http://localhost:8080"
+echo "=== Go REST API - ApiKeyOnly Authentication Testing ==="
+echo "Base URL: $BASE_URL"
+echo "API Key: $API_KEY"
+echo "Following industry best practices - no JWT required for register/login"
+echo ""
 
-# Colors for output
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
-
-# Function to print colored output
-print_status() {
-    if [ $1 -eq 0 ]; then
-        echo -e "${GREEN}✅ SUCCESS${NC}"
+# Function to run actual tests
+run_tests() {
+    echo "=== RUNNING AUTOMATED TESTS ==="
+    echo ""
+    
+    echo "1. Testing Register Endpoint (API Key Only)..."
+    REGISTER_RESPONSE=$(curl -s -X POST "$BASE_URL/api/v1/public/auth/register" \
+        -H "X-API-Key: $API_KEY" \
+        -H "Content-Type: application/json" \
+        -d '{
+            "username": "testuser", 
+            "email": "test@example.com", 
+            "password": "password123",
+            "full_name": "Test User"
+        }')
+    
+    echo "Register Response: $REGISTER_RESPONSE"
+    
+    echo ""
+    echo "2. Testing Login Endpoint (API Key Only)..."
+    LOGIN_RESPONSE=$(curl -s -X POST "$BASE_URL/api/v1/public/auth/login" \
+        -H "X-API-Key: $API_KEY" \
+        -H "Content-Type: application/json" \
+        -d '{
+            "username": "testuser", 
+            "password": "password123"
+        }')
+    
+    echo "Login Response: $LOGIN_RESPONSE"
+    
+    # Extract private token from login response
+    PRIVATE_TOKEN=$(echo $LOGIN_RESPONSE | grep -o '"token":"[^"]*' | cut -d'"' -f4)
+    
+    if [ -n "$PRIVATE_TOKEN" ]; then
+        echo "✓ Private token obtained: ${PRIVATE_TOKEN:0:20}..."
+        
+        echo ""
+        echo "3. Testing Private Endpoints (API Key + Private Token)..."
+        USERS_RESPONSE=$(curl -s -X GET "$BASE_URL/api/v1/users" \
+            -H "X-API-Key: $API_KEY" \
+            -H "Authorization: Bearer $PRIVATE_TOKEN" \
+            -H "Accept: application/json")
+        
+        echo "Users Response: $USERS_RESPONSE"
+        echo "✓ All tests completed successfully!"
+        echo ""
+        
+        echo "2. Registering user (may fail if user exists)..."
+        REGISTER_RESPONSE=$(curl -s -X POST "$BASE_URL/api/v1/public/auth/register" \
+            -H "X-API-Key: $API_KEY" \
+            -H "Authorization: Bearer $PUBLIC_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{
+                "name": "Test User",
+                "email": "test@example.com",
+                "password": "password123"
+            }')
+        echo "Response: $REGISTER_RESPONSE"
+        echo ""
+        
+        echo "3. Logging in to get private token..."
+        LOGIN_RESPONSE=$(curl -s -X POST "$BASE_URL/api/v1/public/auth/login" \
+            -H "X-API-Key: $API_KEY" \
+            -H "Authorization: Bearer $PUBLIC_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{
+                "email": "test@example.com",
+                "password": "password123"
+            }')
+        echo "Response: $LOGIN_RESPONSE"
+        
+        # Extract private token
+        PRIVATE_TOKEN=$(echo $LOGIN_RESPONSE | grep -o '"token":"[^"]*' | cut -d'"' -f4)
+        
+        if [ -n "$PRIVATE_TOKEN" ]; then
+            echo "✓ Private token obtained: ${PRIVATE_TOKEN:0:20}..."
+            echo ""
+            
+            echo "4. Testing private endpoint access..."
+            USERS_RESPONSE=$(curl -s -X GET "$BASE_URL/api/v1/users" \
+                -H "X-API-Key: $API_KEY" \
+                -H "Authorization: Bearer $PRIVATE_TOKEN" \
+                -H "Accept: application/json")
+            echo "Response: $USERS_RESPONSE"
+            echo ""
+            
+            echo "5. Testing token refresh..."
+            REFRESH_RESPONSE=$(curl -s -X POST "$BASE_URL/api/v1/public/auth/refresh" \
+                -H "X-API-Key: $API_KEY" \
+                -H "Authorization: Bearer $PRIVATE_TOKEN" \
+                -H "Content-Type: application/json")
+            echo "Response: $REFRESH_RESPONSE"
+            echo ""
+            
+        else
+            echo "✗ Failed to get private token"
+        fi
     else
-        echo -e "${RED}❌ FAILED${NC}"
+        echo "✗ Failed to get public token"
+    fi
+    
+    echo "=== ERROR TESTS ==="
+    echo ""
+    
+    echo "Testing with invalid API key..."
+    INVALID_RESPONSE=$(curl -s -X GET "$BASE_URL/api/v1/public/auth/token" \
+        -H "X-API-Key: invalid-key" \
+        -H "Accept: application/json")
+    echo "Response: $INVALID_RESPONSE"
+    echo ""
+    
+    echo "Testing without API key..."
+    NO_KEY_RESPONSE=$(curl -s -X GET "$BASE_URL/api/v1/public/auth/token" \
+        -H "Accept: application/json")
+    echo "Response: $NO_KEY_RESPONSE"
+    echo ""
+    
+    if [ -n "$PUBLIC_TOKEN" ]; then
+        echo "Testing private access with public token..."
+        WRONG_TOKEN_RESPONSE=$(curl -s -X GET "$BASE_URL/api/v1/users" \
+            -H "X-API-Key: $API_KEY" \
+            -H "Authorization: Bearer $PUBLIC_TOKEN" \
+            -H "Accept: application/json")
+        echo "Response: $WRONG_TOKEN_RESPONSE"
+        echo ""
     fi
 }
 
-echo ""
-echo "📋 Prerequisites:"
-echo "1. Start your API server: go run ./cmd/api/ --port=8080"
-echo "2. Make sure you have a valid API key in database"
-echo "3. Make sure you have curl installed"
-echo ""
+# Show manual commands
+show_manual_commands() {
+    echo "=== MANUAL TESTING COMMANDS ==="
+    echo ""
+    
+    echo "=== Step 1: Get Public Token ==="
+    echo "curl -X GET \"$BASE_URL/api/v1/public/auth/token\" \\"
+    echo "  -H \"X-API-Key: $API_KEY\" \\"
+    echo "  -H \"Accept: application/json\""
+    echo ""
+    
+    echo "=== Step 2: Register User (using public token) ==="
+    echo "curl -X POST \"$BASE_URL/api/v1/public/auth/register\" \\"
+    echo "  -H \"X-API-Key: $API_KEY\" \\"
+    echo "  -H \"Authorization: Bearer YOUR_PUBLIC_TOKEN\" \\"
+    echo "  -H \"Content-Type: application/json\" \\"
+    echo "  -d '{"
+    echo "    \"name\": \"Test User\","
+    echo "    \"email\": \"test@example.com\","
+    echo "    \"password\": \"password123\""
+    echo "  }'"
+    echo ""
+    
+    echo "=== Step 3: Login User (get private token) ==="
+    echo "curl -X POST \"$BASE_URL/api/v1/public/auth/login\" \\"
+    echo "  -H \"X-API-Key: $API_KEY\" \\"
+    echo "  -H \"Authorization: Bearer YOUR_PUBLIC_TOKEN\" \\"
+    echo "  -H \"Content-Type: application/json\" \\"
+    echo "  -d '{"
+    echo "    \"email\": \"test@example.com\","
+    echo "    \"password\": \"password123\""
+    echo "  }'"
+    echo ""
+    
+    echo "=== Step 4: Access Private Endpoint ==="
+    echo "curl -X GET \"$BASE_URL/api/v1/users\" \\"
+    echo "  -H \"X-API-Key: $API_KEY\" \\"
+    echo "  -H \"Authorization: Bearer YOUR_PRIVATE_TOKEN\" \\"
+    echo "  -H \"Accept: application/json\""
+    echo ""
+    
+    echo "=== Step 5: Refresh Token ==="
+    echo "curl -X POST \"$BASE_URL/api/v1/public/auth/refresh\" \\"
+    echo "  -H \"X-API-Key: $API_KEY\" \\"
+    echo "  -H \"Authorization: Bearer YOUR_PRIVATE_TOKEN\" \\"
+    echo "  -H \"Content-Type: application/json\""
+    echo ""
+    
+    echo "=== Step 6: Logout ==="
+    echo "curl -X POST \"$BASE_URL/api/v1/public/auth/logout\" \\"
+    echo "  -H \"X-API-Key: $API_KEY\" \\"
+    echo "  -H \"Authorization: Bearer YOUR_PRIVATE_TOKEN\" \\"
+    echo "  -H \"Content-Type: application/json\""
+    echo ""
+    
+    echo "=== Error Testing ==="
+    echo ""
+    echo "Test with invalid API key:"
+    echo "curl -X GET \"$BASE_URL/api/v1/public/auth/token\" \\"
+    echo "  -H \"X-API-Key: invalid-key\" \\"
+    echo "  -H \"Accept: application/json\""
+    echo ""
+    
+    echo "Test without API key:"
+    echo "curl -X GET \"$BASE_URL/api/v1/public/auth/token\" \\"
+    echo "  -H \"Accept: application/json\""
+    echo ""
+    
+    echo "Test accessing private endpoint with public token:"
+    echo "curl -X GET \"$BASE_URL/api/v1/users\" \\"
+    echo "  -H \"X-API-Key: $API_KEY\" \\"
+    echo "  -H \"Authorization: Bearer YOUR_PUBLIC_TOKEN\" \\"
+    echo "  -H \"Accept: application/json\""
+    echo ""
+}
 
-# Check if server is running
-echo "🔍 Checking if server is running..."
-curl -s -f -o /dev/null --connect-timeout 5 "$BASE_URL/health" 2>/dev/null
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}✅ Server is running${NC}"
+# Main script logic
+if [ "$1" = "test" ]; then
+    run_tests
 else
-    echo -e "${RED}❌ Server is not running on $BASE_URL${NC}"
-    echo "Please start the server first: go run ./cmd/api/ --port=8080"
-    exit 1
+    show_manual_commands
+    echo ""
+    echo "=== Usage ==="
+    echo "Show manual commands: ./manual_test_guide.sh"
+    echo "Run automated tests: ./manual_test_guide.sh test"
 fi
-
-echo ""
-echo "🧪 MANUAL TESTING GUIDE - JWT Flow"
-echo "=================================="
-
-echo ""
-echo "📱 TYPICAL USAGE FLOW:"
-echo "1. Get Public Token (with API Key)"
-echo "2. Use Public Token to Login"
-echo "3. Get Private Token from Login response"
-echo "4. Use Private Token for protected endpoints"
-
-echo ""
-echo "1️⃣ STEP 1: GET PUBLIC TOKEN"
-echo "# You need API key to get public token"
-echo "# Run: go run jwt_tester.go"
-echo "# Copy the PUBLIC token from output"
-
-echo ""
-echo "2️⃣ STEP 2: LOGIN with Public Token (get Private Token)"
-echo "curl -X POST $BASE_URL/api/v1/public/auth/login \\"
-echo "  -H \"Content-Type: application/json\" \\"
-echo "  -H \"X-API-Key: \$API_KEY\" \\"
-echo "  -H \"Authorization: Bearer \$PUBLIC_JWT_TOKEN\" \\"
-echo "  -d '{\"username\":\"your-username\",\"password\":\"your-password\"}'"
-echo "# Response should contain PRIVATE token"
-
-echo ""
-echo "3️⃣ STEP 3: USE Private Token for Protected Endpoints"
-echo "curl -X GET $BASE_URL/api/v1/private/users/profile \\"
-echo "  -H \"X-API-Key: \$API_KEY\" \\"
-echo "  -H \"Authorization: Bearer \$PRIVATE_JWT_TOKEN\""
-
-echo ""
-echo "4️⃣ SECURITY TESTS:"
-echo ""
-echo "# Test 1: Try Public Token on Private Endpoint (should fail)"
-echo "curl -X GET $BASE_URL/api/v1/private/users/profile \\"
-echo "  -H \"X-API-Key: \$API_KEY\" \\"
-echo "  -H \"Authorization: Bearer \$PUBLIC_JWT_TOKEN\""
-echo "# Expected: Error - public token not valid for private endpoint"
-echo ""
-echo "# Test 2: Try without API Key (should fail)"
-echo "curl -X GET $BASE_URL/api/v1/private/users/profile \\"
-echo "  -H \"Authorization: Bearer \$PRIVATE_JWT_TOKEN\""
-echo "# Expected: Error - API key required"
-echo ""
-echo "# Test 3: Try with wrong API Key (should fail)"
-echo "curl -X GET $BASE_URL/api/v1/private/users/profile \\"
-echo "  -H \"X-API-Key: wrong-api-key\" \\"
-echo "  -H \"Authorization: Bearer \$PRIVATE_JWT_TOKEN\""
-echo "# Expected: Error - invalid API key"
-
-echo ""
-echo "🔑 SAMPLE TOKENS FROM PREVIOUS TEST:"
-echo "You can use the tokens generated by: go run jwt_tester.go"
-
-echo ""
-echo "🌐 ONLINE JWT DEBUGGER:"
-echo "Visit: https://jwt.io/"
-echo "Secret: test-secret-key-for-manual-testing"
-echo "Algorithm: HS256"
-
-echo ""
-echo "📝 TOKEN STRUCTURE DIFFERENCES:"
-echo ""
-echo "Public JWT Claims:"
-echo "{"
-echo "  \"api_key_id\": 1,"
-echo "  \"api_key_name\": \"test-key\","
-echo "  \"iss\": \"go-rest-api\","
-echo "  \"sub\": \"public-access\","
-echo "  \"exp\": 1234567890"
-echo "}"
-echo ""
-echo "Private JWT Claims:"
-echo "{"
-echo "  \"api_key_id\": 1,"
-echo "  \"api_key_name\": \"test-key\","
-echo "  \"user_id\": 999,"
-echo "  \"username\": \"testuser\","
-echo "  \"email\": \"test@example.com\","
-echo "  \"iss\": \"go-rest-api\","
-echo "  \"sub\": \"private-access\","
-echo "  \"exp\": 1234567890"
-echo "}"
-
-echo ""
-echo "🚀 QUICK START:"
-echo "1. Run: go run jwt_tester.go"
-echo "2. Copy the generated tokens"
-echo "3. Replace \$API_KEY and \$JWT_TOKEN in curl commands above"
-echo "4. Test your endpoints!"
-
-echo ""
-echo "💡 TIP: Save this script and make it executable:"
-echo "chmod +x manual_test_guide.sh"
-echo "./manual_test_guide.sh"

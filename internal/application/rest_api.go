@@ -10,7 +10,6 @@ import (
 	gocli "github.com/budimanlai/go-cli"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/keyauth"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
@@ -64,23 +63,15 @@ func RestApi(c *gocli.Cli) {
 		SupportedLangs:  []string{"en", "id"},
 	}))
 
-	app.Use(keyauth.New(keyauth.Config{
-		KeyLookup: "header:x-api-key",
-		Validator: validateAPIKey,
-		ErrorHandler: func(c *fiber.Ctx, err error) error {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"success": false,
-				"message": "Unauthorized. Invalid api key",
-			})
-		},
-	}))
-
 	// Initialize dependencies using dependency injection container
 	container := NewContainer(db)
 
 	// Setup all routes using route manager
 	routeConfig := &routes.RouteConfig{
-		UserHandler: container.UserHandler,
+		UserHandler:   container.UserHandler,
+		AuthHandler:   container.AuthHandler,
+		JWTService:    container.JWTService,
+		ApiKeyService: container.ApiKeyService,
 		// Future: Add more handlers here
 		// ProductHandler: container.ProductHandler,
 		// OrderHandler:   container.OrderHandler,
@@ -90,19 +81,4 @@ func RestApi(c *gocli.Cli) {
 	if err := app.Listen(":" + port); err != nil {
 		c.Log(fmt.Sprintf("Failed to start server: %v", err))
 	}
-}
-
-func validateAPIKey(c *fiber.Ctx, key string) (bool, error) {
-	// For now, let's use a simple validation
-	// You can implement proper API key validation here
-	// For example, check against database or hardcoded keys
-	validKeys := []string{"test-api-key", "development-key"}
-
-	for _, validKey := range validKeys {
-		if key == validKey {
-			return true, nil
-		}
-	}
-
-	return false, nil
 }

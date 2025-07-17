@@ -90,7 +90,7 @@ func (c *Container) initServices() {
 // initHandlers initializes all HTTP handlers
 func (c *Container) initHandlers() {
 	c.UserHandler = handler.NewUserHandler(c.UserService, c.ResponseHelper)
-	c.AuthHandler = handler.NewAuthHandler(c.UserService, c.ResponseHelper)
+	c.AuthHandler = handler.NewAuthHandler(c.UserService, c.JWTService, c.ApiKeyService, c.ResponseHelper)
 }
 
 // Future: Add more dependencies here

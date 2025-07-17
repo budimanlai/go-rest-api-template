@@ -1,0 +1,365 @@
+{
+	"info": {
+		"name": "Go REST API - JWT Authentication",
+		"description": "Complete testing collection for Go REST API with 2-tier JWT authentication system",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"version": "2.0.0"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string",
+			"description": "Base URL of the API server"
+		},
+		{
+			"key": "api_key",
+			"value": "test-api-key-12345",
+			"type": "string",
+			"description": "Valid API key for testing"
+		},
+		{
+			"key": "public_token",
+			"value": "",
+			"type": "string",
+			"description": "Public JWT token (API key only)"
+		},
+		{
+			"key": "private_token",
+			"value": "",
+			"type": "string",
+			"description": "Private JWT token (API key + user info)"
+		},
+		{
+			"key": "user_email",
+			"value": "test@example.com",
+			"type": "string",
+			"description": "Test user email"
+		},
+		{
+			"key": "user_password",
+			"value": "password123",
+			"type": "string",
+			"description": "Test user password"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Get Public Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    const response = pm.response.json();",
+							"    pm.collectionVariables.set('public_token', response.data.token);",
+							"    console.log('Public token saved:', response.data.token);",
+							"} else {",
+							"    console.log('Failed to get public token:', pm.response.text());",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-Key",
+						"value": "{{api_key}}",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/public/auth/token",
+					"host": ["{{base_url}}"],
+					"path": ["api", "v1", "public", "auth", "token"]
+				},
+				"description": "Get public JWT token using API key only"
+			},
+			"response": []
+		},
+		{
+			"name": "2. Register User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 201) {",
+							"    console.log('User registered successfully');",
+							"} else if (pm.response.code === 409) {",
+							"    console.log('User already exists, continuing...');",
+							"} else {",
+							"    console.log('Registration failed:', pm.response.text());",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-Key",
+						"value": "{{api_key}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"testuser\",\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\",\n    \"full_name\": \"Test User\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/public/auth/register",
+					"host": ["{{base_url}}"],
+					"path": ["api", "v1", "public", "auth", "register"]
+				},
+				"description": "Register a new user (API key only - following industry best practices)"
+			},
+			"response": []
+		},
+		{
+			"name": "3. Login User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    const response = pm.response.json();",
+							"    pm.collectionVariables.set('private_token', response.data.token);",
+							"    console.log('Private token saved:', response.data.token);",
+							"    console.log('User info:', response.data.user);",
+							"} else {",
+							"    console.log('Login failed:', pm.response.text());",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-Key",
+						"value": "{{api_key}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/public/auth/login",
+					"host": ["{{base_url}}"],
+					"path": ["api", "v1", "public", "auth", "login"]
+				},
+				"description": "Login user and get private JWT token (API key only - simplified authentication)"
+			},
+			"response": []
+		},
+		{
+			"name": "4. Get All Users (Private)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-Key",
+						"value": "{{api_key}}",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{private_token}}",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/users",
+					"host": ["{{base_url}}"],
+					"path": ["api", "v1", "users"]
+				},
+				"description": "Get all users (requires private token)"
+			},
+			"response": []
+		},
+		{
+			"name": "5. Refresh Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    const response = pm.response.json();",
+							"    pm.collectionVariables.set('private_token', response.data.token);",
+							"    console.log('Token refreshed:', response.data.token);",
+							"} else {",
+							"    console.log('Token refresh failed:', pm.response.text());",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-Key",
+						"value": "{{api_key}}",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{private_token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/public/auth/refresh",
+					"host": ["{{base_url}}"],
+					"path": ["api", "v1", "public", "auth", "refresh"]
+				},
+				"description": "Refresh JWT token"
+			},
+			"response": []
+		},
+		{
+			"name": "6. Logout",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-Key",
+						"value": "{{api_key}}",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{private_token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/public/auth/logout",
+					"host": ["{{base_url}}"],
+					"path": ["api", "v1", "public", "auth", "logout"]
+				},
+				"description": "Logout user and invalidate token"
+			},
+			"response": []
+		},
+		{
+			"name": "Test - Invalid API Key",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-Key",
+						"value": "invalid-api-key",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/public/auth/token",
+					"host": ["{{base_url}}"],
+					"path": ["api", "v1", "public", "auth", "token"]
+				},
+				"description": "Test with invalid API key (should fail)"
+			},
+			"response": []
+		},
+		{
+			"name": "Test - No API Key",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/public/auth/token",
+					"host": ["{{base_url}}"],
+					"path": ["api", "v1", "public", "auth", "token"]
+				},
+				"description": "Test without API key (should fail)"
+			},
+			"response": []
+		},
+		{
+			"name": "Test - Access Private with Public Token",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-Key",
+						"value": "{{api_key}}",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{public_token}}",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/users",
+					"host": ["{{base_url}}"],
+					"path": ["api", "v1", "users"]
+				},
+				"description": "Test accessing private endpoint with public token (should fail)"
+			},
+			"response": []
+		}
+	]
+}

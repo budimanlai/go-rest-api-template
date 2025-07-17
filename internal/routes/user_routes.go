@@ -2,13 +2,22 @@ package routes
 
 import (
 	"go-rest-api-template/internal/handler"
+	"go-rest-api-template/internal/middleware"
+	"go-rest-api-template/internal/service"
+
 	"github.com/gofiber/fiber/v2"
 )
 
-// SetupUserRoutes sets up user-related routes
-func SetupUserRoutes(app *fiber.App, userHandler *handler.UserHandler) {
-	// Create user routes group
-	userGroup := app.Group("/api/v1/users")
+// SetupUserRoutes sets up user-related routes with Private JWT middleware
+func SetupUserRoutes(app *fiber.App, userHandler *handler.UserHandler, apiKeyService service.ApiKeyService, jwtService service.JWTService) {
+	// API versioning
+	v1 := app.Group("/api/v1")
+
+	// Private middleware - requires API key + private JWT token
+	privateMiddleware := middleware.PrivateMiddleware(apiKeyService, jwtService)
+
+	// Create user routes group with private middleware
+	userGroup := v1.Group("/users", privateMiddleware)
 
 	// User CRUD routes
 	userGroup.Post("/", userHandler.CreateUser)
