@@ -22,13 +22,17 @@ type Container struct {
 	ResponseHelper *response.I18nResponseHelper
 
 	// Repositories
-	UserRepo repository.UserRepository
+	UserRepo   repository.UserRepository
+	ApiKeyRepo repository.ApiKeyRepository
 
 	// Services (Business Logic)
-	UserService usecase.UserUsecase
+	JWTService    service.JWTService
+	UserService   usecase.UserUsecase
+	ApiKeyService service.ApiKeyService
 
 	// Handlers (HTTP Controllers)
 	UserHandler *handler.UserHandler
+	AuthHandler *handler.AuthHandler
 }
 
 // NewContainer creates and initializes all dependencies
@@ -67,16 +71,26 @@ func (c *Container) initI18n() {
 // initRepositories initializes all repository implementations
 func (c *Container) initRepositories() {
 	c.UserRepo = repositoryImpl.NewUserRepository(c.DB)
+	c.ApiKeyRepo = repositoryImpl.NewApiKeyRepository(c.DB)
 }
 
 // initServices initializes all service implementations
 func (c *Container) initServices() {
-	c.UserService = service.NewUserService(c.UserRepo)
+	// Initialize JWT service with configuration
+	// TODO: Move these to config file
+	jwtSecret := "your-super-secret-jwt-key-change-this-in-production"
+	publicTokenExpiry := 2   // 2 hours for public tokens
+	privateTokenExpiry := 24 // 24 hours for private tokens
+
+	c.ApiKeyService = service.NewApiKeyService(c.ApiKeyRepo)
+	c.JWTService = service.NewJWTService(jwtSecret, publicTokenExpiry, privateTokenExpiry, c.ApiKeyService)
+	c.UserService = service.NewUserService(c.UserRepo, c.JWTService)
 }
 
 // initHandlers initializes all HTTP handlers
 func (c *Container) initHandlers() {
 	c.UserHandler = handler.NewUserHandler(c.UserService, c.ResponseHelper)
+	c.AuthHandler = handler.NewAuthHandler(c.UserService, c.ResponseHelper)
 }
 
 // Future: Add more dependencies here

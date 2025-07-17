@@ -1,4 +1,17 @@
-Saya ingin menambahkan middleware JWT untuk authorisasi. authorisasi ada 2 macam
-1. Untuk halaman guest seperti login, register, reset password, dsb. 
-dimana user tidak perlu login untuk mengakses endpoint tersebut
-2. Halaman private: untuk halaman ini user perlu login terlebih dahulu untuk mendapatkan token session
+Penggunaan middleware JWT ada 2 macam:
+1. JWT untuk public
+- JWT ini digunakan untuk mengakses endpoint yang terbuka untuk umum seperti: login, register, reset password, dsb
+endpoint public tidak memerlukan user token atau user tidak perlu login.
+- JWTClaims nya berbeda dengan yang private
+- JWTClaims hanya berisi api_key yang digunakan aplikasi
+- Jika validasi token berhasil, maka akan di kembalikan object entity ApiKey
+
+2. JWT untuk private
+- JWT ini digunakan untuk mengakses endpoint yang bersifat tertutup. Hanya user yang sudah login (diberikan JWT Token) 
+yang bisa mengakses endpoint private
+- Jadi user harus login dulu untuk mendapatkan JWT private
+- JWTClaims nya berbeda dengan yang public
+- JWTClaims berisi api_key dan user_id
+- Jika validasi token berhasil, maka akan mengembalikan object entity user dan apikey
+
+kedua JWT ini harus ada expired time nya agar tidak menjadi lifetime token

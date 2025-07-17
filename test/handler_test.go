@@ -123,6 +123,19 @@ func (m *MockUserUsecase) ChangePassword(ctx context.Context, userID int, curren
 	return args.Error(0)
 }
 
+func (m *MockUserUsecase) Login(ctx context.Context, username, password string) (*entity.User, string, error) {
+	args := m.Called(ctx, username, password)
+	if args.Get(0) == nil {
+		return nil, args.String(1), args.Error(2)
+	}
+	return args.Get(0).(*entity.User), args.String(1), args.Error(2)
+}
+
+func (m *MockUserUsecase) RefreshToken(ctx context.Context, tokenString string) (string, error) {
+	args := m.Called(ctx, tokenString)
+	return args.String(0), args.Error(1)
+}
+
 func TestUserHandler_CreateUser(t *testing.T) {
 	// Setup
 	mockUsecase := new(MockUserUsecase)

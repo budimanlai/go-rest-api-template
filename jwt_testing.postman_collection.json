@@ -1,0 +1,156 @@
+{
+	"info": {
+		"name": "JWT Manual Testing Collection",
+		"description": "Collection untuk test manual sistem JWT dengan 2 jenis token",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "api_key",
+			"value": "your-api-key-here",
+			"type": "string"
+		},
+		{
+			"key": "public_jwt_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "private_jwt_token",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Health Check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/health",
+					"host": ["{{base_url}}"],
+					"path": ["health"]
+				}
+			}
+		},
+		{
+			"name": "2. Login (Public Endpoint) - Get Private Token",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-API-Key",
+						"value": "{{api_key}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"username\": \"your-username\",\n  \"password\": \"your-password\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/public/auth/login",
+					"host": ["{{base_url}}"],
+					"path": ["api", "v1", "public", "auth", "login"]
+				}
+			}
+		},
+		{
+			"name": "3. Register (Public Endpoint) - Only API Key",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-API-Key",
+						"value": "{{api_key}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"username\": \"testuser\",\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/public/users",
+					"host": ["{{base_url}}"],
+					"path": ["api", "v1", "public", "users"]
+				}
+			}
+		},
+		{
+			"name": "4. Get User Profile (Private Endpoint) - API Key + Private JWT",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-Key",
+						"value": "{{api_key}}"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{private_jwt_token}}"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/private/users/profile",
+					"host": ["{{base_url}}"],
+					"path": ["api", "v1", "private", "users", "profile"]
+				}
+			}
+		},
+		{
+			"name": "5. Security Test - Public Token on Private Endpoint (Should Fail)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-Key",
+						"value": "{{api_key}}"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{public_jwt_token}}"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/private/users/profile",
+					"host": ["{{base_url}}"],
+					"path": ["api", "v1", "private", "users", "profile"]
+				}
+			}
+		},
+		{
+			"name": "6. Test Public Endpoint with Public JWT (Optional)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-Key",
+						"value": "{{api_key}}"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{public_jwt_token}}"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/public/some-endpoint",
+					"host": ["{{base_url}}"],
+					"path": ["api", "v1", "public", "some-endpoint"]
+				}
+			}
+		}
+	]
+}

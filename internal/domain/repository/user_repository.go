@@ -15,6 +15,6 @@ type UserRepository interface {
 	Delete(ctx context.Context, id int) error
 	GetAll(ctx context.Context, limit, offset int) ([]*entity.User, error)
 	GetCount(ctx context.Context) (int, error)
-	GetByResetPasswordToken(ctx context.Context, token string) (*entity.User, error)
-	UpdateResetPasswordToken(ctx context.Context, user *entity.User) error
+	GetByVerificationToken(ctx context.Context, token string) (*entity.User, error)
+	UpdateVerificationToken(ctx context.Context, user *entity.User) error
 }

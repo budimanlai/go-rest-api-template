@@ -11,19 +11,18 @@ import (
 
 // User represents a user entity
 type User struct {
-	ID                     int        `json:"id"`
-	Username               string     `json:"username"`
-	Email                  string     `json:"email"`
-	PasswordHash           string     `json:"-"`
-	Status                 string     `json:"status"`
-	ResetPasswordToken     *string    `json:"-"`
-	ResetPasswordExpiresAt *time.Time `json:"-"`
-	CreatedAt              time.Time  `json:"created_at"`
-	UpdatedAt              time.Time  `json:"updated_at"`
-	DeletedAt              *time.Time `json:"deleted_at,omitempty"`
-	CreatedBy              *int       `json:"created_by,omitempty"`
-	UpdatedBy              *int       `json:"updated_by,omitempty"`
-	DeletedBy              *int       `json:"deleted_by,omitempty"`
+	ID                int        `json:"id"`
+	Username          string     `json:"username"`
+	Email             string     `json:"email"`
+	PasswordHash      string     `json:"-"`
+	Status            string     `json:"status"`
+	VerificationToken *string    `json:"-"`
+	CreatedAt         time.Time  `json:"created_at"`
+	UpdatedAt         time.Time  `json:"updated_at"`
+	DeletedAt         *time.Time `json:"deleted_at,omitempty"`
+	CreatedBy         *int       `json:"created_by,omitempty"`
+	UpdatedBy         *int       `json:"updated_by,omitempty"`
+	DeletedBy         *int       `json:"deleted_by,omitempty"`
 }
 
 // Business validation rules
@@ -66,8 +65,8 @@ func (u *User) IsActive() bool {
 	return u.Status == "active"
 }
 
-// GenerateResetPasswordToken creates a new reset password token
-func (u *User) GenerateResetPasswordToken() error {
+// GenerateVerificationToken creates a new verification token
+func (u *User) GenerateVerificationToken() error {
 	// Generate 32 random bytes
 	bytes := make([]byte, 32)
 	if _, err := rand.Read(bytes); err != nil {
@@ -76,32 +75,23 @@ func (u *User) GenerateResetPasswordToken() error {
 
 	// Convert to hex string
 	token := hex.EncodeToString(bytes)
-	u.ResetPasswordToken = &token
-
-	// Set expiration to 1 hour from now
-	expiresAt := time.Now().Add(1 * time.Hour)
-	u.ResetPasswordExpiresAt = &expiresAt
+	u.VerificationToken = &token
 
 	return nil
 }
 
-// IsResetPasswordTokenValid checks if reset token is valid and not expired
-func (u *User) IsResetPasswordTokenValid(token string) bool {
-	if u.ResetPasswordToken == nil || *u.ResetPasswordToken != token {
-		return false
-	}
-
-	if u.ResetPasswordExpiresAt == nil || time.Now().After(*u.ResetPasswordExpiresAt) {
+// IsVerificationTokenValid checks if verification token is valid
+func (u *User) IsVerificationTokenValid(token string) bool {
+	if u.VerificationToken == nil || *u.VerificationToken != token {
 		return false
 	}
 
 	return true
 }
 
-// ClearResetPasswordToken removes the reset password token
-func (u *User) ClearResetPasswordToken() {
-	u.ResetPasswordToken = nil
-	u.ResetPasswordExpiresAt = nil
+// ClearVerificationToken removes the verification token
+func (u *User) ClearVerificationToken() {
+	u.VerificationToken = nil
 }
 
 // SetAuditFields sets the audit fields for create/update operations

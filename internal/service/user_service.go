@@ -10,14 +10,60 @@ import (
 )
 
 type userService struct {
-	userRepo repository.UserRepository
+	userRepo   repository.UserRepository
+	jwtService JWTService
 }
 
 // NewUserService creates a new user service
-func NewUserService(userRepo repository.UserRepository) usecase.UserUsecase {
+func NewUserService(userRepo repository.UserRepository, jwtService JWTService) usecase.UserUsecase {
 	return &userService{
-		userRepo: userRepo,
+		userRepo:   userRepo,
+		jwtService: jwtService,
 	}
+}
+
+// Login authenticates a user and returns user data with JWT token
+func (s *userService) Login(ctx context.Context, username, password string) (*entity.User, string, error) {
+	// Get user by username or email
+	var user *entity.User
+	var err error
+
+	// Try to find user by username first
+	user, err = s.userRepo.GetByUsername(ctx, username)
+	if err != nil || user == nil {
+		// If not found, try by email
+		user, err = s.userRepo.GetByEmail(ctx, username)
+		if err != nil {
+			return nil, "", errors.New("invalid credentials")
+		}
+	}
+
+	if user == nil {
+		return nil, "", errors.New("invalid credentials")
+	}
+
+	// Check if user is active
+	if !user.IsActive() {
+		return nil, "", errors.New("account is not active")
+	}
+
+	// Verify password
+	if !user.CheckPassword(password) {
+		return nil, "", errors.New("invalid credentials")
+	}
+
+	// Note: For login, we don't generate JWT token here anymore
+	// The token generation should be handled by the login handler
+	// which will have access to the API key information
+	// This method now only validates user credentials
+
+	return user, "", nil
+}
+
+// RefreshToken is no longer available in the new JWT system
+// Token refresh should be handled at the handler level with API key validation
+func (s *userService) RefreshToken(ctx context.Context, tokenString string) (string, error) {
+	return "", errors.New("refresh token not supported in new JWT system")
 }
 
 func (s *userService) CreateUser(ctx context.Context, user *entity.User) error {
@@ -152,13 +198,13 @@ func (s *userService) ForgotPassword(ctx context.Context, email string) error {
 		return errors.New("user not found")
 	}
 
-	// Generate reset token
-	if err := user.GenerateResetPasswordToken(); err != nil {
+	// Generate verification token
+	if err := user.GenerateVerificationToken(); err != nil {
 		return err
 	}
 
-	// Update user with reset token
-	if err := s.userRepo.Update(ctx, user); err != nil {
+	// Update user with verification token
+	if err := s.userRepo.UpdateVerificationToken(ctx, user); err != nil {
 		return err
 	}
 
@@ -168,18 +214,18 @@ func (s *userService) ForgotPassword(ctx context.Context, email string) error {
 }
 
 func (s *userService) ResetPassword(ctx context.Context, token, newPassword string) error {
-	// Get user by reset token
-	user, err := s.userRepo.GetByResetPasswordToken(ctx, token)
+	// Get user by verification token
+	user, err := s.userRepo.GetByVerificationToken(ctx, token)
 	if err != nil {
 		return err
 	}
 	if user == nil {
-		return errors.New("invalid or expired reset token")
+		return errors.New("invalid verification token")
 	}
 
-	// Validate reset token
-	if !user.IsResetPasswordTokenValid(token) {
-		return errors.New("reset token has expired")
+	// Validate verification token
+	if !user.IsVerificationTokenValid(token) {
+		return errors.New("invalid verification token")
 	}
 
 	// Hash new password
@@ -187,8 +233,8 @@ func (s *userService) ResetPassword(ctx context.Context, token, newPassword stri
 		return err
 	}
 
-	// Clear reset token
-	user.ClearResetPasswordToken()
+	// Clear verification token
+	user.ClearVerificationToken()
 
 	// Update user
 	return s.userRepo.Update(ctx, user)

@@ -7,25 +7,30 @@ import (
 
 // UserModel - Database model (infrastructure concern)
 type UserModel struct {
-	ID                     int        `db:"id" json:"id"`
-	Username               string     `db:"username" json:"username"`
-	Email                  string     `db:"email" json:"email"`
-	PasswordHash           string     `db:"password_hash" json:"-"`
-	Status                 string     `db:"status" json:"status"`
-	ResetPasswordToken     *string    `db:"reset_password_token" json:"-"`
-	ResetPasswordExpiresAt *time.Time `db:"reset_password_expires_at" json:"-"`
-	CreatedAt              time.Time  `db:"created_at" json:"created_at"`
-	UpdatedAt              time.Time  `db:"updated_at" json:"updated_at"`
-	DeletedAt              *time.Time `db:"deleted_at" json:"deleted_at,omitempty"`
-	CreatedBy              *int       `db:"created_by" json:"created_by,omitempty"`
-	UpdatedBy              *int       `db:"updated_by" json:"updated_by,omitempty"`
-	DeletedBy              *int       `db:"deleted_by" json:"deleted_by,omitempty"`
+	ID                int        `db:"id" json:"id"`
+	Username          string     `db:"username" json:"username"`
+	Email             string     `db:"email" json:"email"`
+	PasswordHash      string     `db:"password_hash" json:"-"`
+	Status            string     `db:"status" json:"status"`
+	VerificationToken *string    `db:"verification_token" json:"-"`
+	CreatedAt         time.Time  `db:"created_at" json:"created_at"`
+	UpdatedAt         time.Time  `db:"updated_at" json:"updated_at"`
+	DeletedAt         *time.Time `db:"deleted_at" json:"deleted_at,omitempty"`
+	CreatedBy         *int       `db:"created_by" json:"created_by,omitempty"`
+	UpdatedBy         *int       `db:"updated_by" json:"updated_by,omitempty"`
+	DeletedBy         *int       `db:"deleted_by" json:"deleted_by,omitempty"`
 }
 
 // UserCreateRequest - DTO for HTTP requests with comprehensive validation
 type UserCreateRequest struct {
 	Username string `json:"username" validate:"required,min=3,max=50,alphanum"`
 	Email    string `json:"email" validate:"required,email,max=100"`
+	Password string `json:"password" validate:"required,min=8,max=100"`
+}
+
+// UserLoginRequest - DTO for login requests
+type UserLoginRequest struct {
+	Username string `json:"username" validate:"required,min=3,max=50"`
 	Password string `json:"password" validate:"required,min=8,max=100"`
 }
 
@@ -66,6 +71,11 @@ type UserResponse struct {
 
 // Validate validates UserCreateRequest
 func (r *UserCreateRequest) Validate() error {
+	return validator.ValidateStruct(r)
+}
+
+// Validate validates UserLoginRequest
+func (r *UserLoginRequest) Validate() error {
 	return validator.ValidateStruct(r)
 }
 
