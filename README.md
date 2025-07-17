@@ -28,6 +28,12 @@ internal/                   # Private application code
 pkg/                       # Public packages (reusable)
 ├── database/              # Database utilities
 ├── response/              # HTTP response helpers
+├── i18n/                  # Internationalization support
+└── validator/             # Input validation utilities
+
+locales/                   # Language files for i18n
+├── en.json                # English translations
+└── id.json                # Indonesian translations
 └── validator/             # Validation utilities
 
 configs/                   # Configuration files
@@ -50,6 +56,8 @@ test/                      # Test files
 - ✅ **Standardized Responses**
 - ✅ **Database Connection Pooling**
 - ✅ **Error Handling**
+- 🌍 **Multilingual Support (i18n)** - English & Indonesian
+- ✅ **Language Detection** via query params & headers
 
 ## 🛠️ Tech Stack
 
@@ -59,6 +67,7 @@ test/                      # Test files
 - **CLI**: Custom CLI framework
 - **Authentication**: API Key based
 - **Password**: bcrypt hashing
+- **i18n**: nicksnyder/go-i18n for multilingual support
 
 ## 📦 Dependencies
 
@@ -68,7 +77,9 @@ require (
     github.com/jmoiron/sqlx
     github.com/go-sql-driver/mysql
     github.com/go-playground/validator
+    github.com/nicksnyder/go-i18n/v2
     golang.org/x/crypto
+    golang.org/x/text
 )
 ```
 
@@ -277,6 +288,35 @@ All endpoints require `x-api-key` header:
 ```
 x-api-key: test-api-key
 ```
+
+### 🌍 Multilingual Support
+
+**Language Detection:**
+```bash
+# Using query parameter
+curl -H "x-api-key: test-api-key" \
+     "http://localhost:8080/api/v1/users?lang=id"
+
+# Using Accept-Language header  
+curl -H "x-api-key: test-api-key" \
+     -H "Accept-Language: id" \
+     "http://localhost:8080/api/v1/users"
+```
+
+**Supported Languages:**
+- 🇺🇸 English (`en`) - Default
+- 🇮🇩 Indonesian (`id`)
+
+**Example Response (Indonesian):**
+```json
+{
+    "success": false,
+    "message": "Pengguna tidak ditemukan",
+    "error": "user_not_found"
+}
+```
+
+For detailed i18n documentation, see [I18N_GUIDE.md](docs/I18N_GUIDE.md)
 
 ## 🚀 Deployment
 

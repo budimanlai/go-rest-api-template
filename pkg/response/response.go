@@ -1,6 +1,8 @@
 package response
 
 import (
+	"go-rest-api-template/pkg/i18n"
+
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -26,6 +28,98 @@ type Pagination struct {
 	Limit      int `json:"limit"`
 	Total      int `json:"total"`
 	TotalPages int `json:"total_pages"`
+}
+
+// ValidationError represents validation error
+type ValidationError struct {
+	Field   string `json:"field"`
+	Message string `json:"message"`
+	Tag     string `json:"tag"`
+	Param   string `json:"param"`
+}
+
+// I18nResponseHelper helps create i18n responses
+type I18nResponseHelper struct {
+	i18nManager *i18n.Manager
+}
+
+// NewI18nResponseHelper creates new i18n response helper
+func NewI18nResponseHelper(manager *i18n.Manager) *I18nResponseHelper {
+	return &I18nResponseHelper{
+		i18nManager: manager,
+	}
+}
+
+// SuccessWithI18n creates success response with i18n message
+func (h *I18nResponseHelper) SuccessWithI18n(c *fiber.Ctx, messageKey string, data interface{}, templateData map[string]interface{}) error {
+	lang := getLanguageFromContext(c)
+	message := h.i18nManager.TranslateSuccess(lang, messageKey, templateData)
+
+	return c.Status(fiber.StatusOK).JSON(StandardResponse{
+		Success: true,
+		Message: message,
+		Data:    data,
+	})
+}
+
+// ErrorWithI18n creates error response with i18n message
+func (h *I18nResponseHelper) ErrorWithI18n(c *fiber.Ctx, status int, errorKey string, templateData map[string]interface{}) error {
+	lang := getLanguageFromContext(c)
+	message := h.i18nManager.TranslateError(lang, errorKey, templateData)
+
+	return c.Status(status).JSON(StandardResponse{
+		Success: false,
+		Message: message,
+		Error:   errorKey,
+	})
+}
+
+// CreatedWithI18n creates 201 response with i18n message
+func (h *I18nResponseHelper) CreatedWithI18n(c *fiber.Ctx, messageKey string, data interface{}, templateData map[string]interface{}) error {
+	lang := getLanguageFromContext(c)
+	message := h.i18nManager.TranslateSuccess(lang, messageKey, templateData)
+
+	return c.Status(fiber.StatusCreated).JSON(StandardResponse{
+		Success: true,
+		Message: message,
+		Data:    data,
+	})
+}
+
+// ValidationErrorWithI18n creates validation error response with i18n
+func (h *I18nResponseHelper) ValidationErrorWithI18n(c *fiber.Ctx, errors []ValidationError) error {
+	lang := getLanguageFromContext(c)
+
+	// Translate each validation error
+	translatedErrors := make([]ValidationError, len(errors))
+	for i, err := range errors {
+		translatedErrors[i] = ValidationError{
+			Field: h.i18nManager.Translate(lang, "field."+err.Field, nil),
+			Message: h.i18nManager.Translate(lang, "validation."+err.Tag, map[string]interface{}{
+				"Field":     h.i18nManager.Translate(lang, "field."+err.Field, nil),
+				"MinLength": err.Param,
+				"MaxLength": err.Param,
+			}),
+			Tag:   err.Tag,
+			Param: err.Param,
+		}
+	}
+
+	message := h.i18nManager.TranslateError(lang, "validation_failed", nil)
+
+	return c.Status(fiber.StatusBadRequest).JSON(StandardResponse{
+		Success: false,
+		Message: message,
+		Data:    translatedErrors,
+	})
+}
+
+// getLanguageFromContext extracts language from fiber context
+func getLanguageFromContext(c *fiber.Ctx) string {
+	if lang, ok := c.Locals("language").(string); ok {
+		return lang
+	}
+	return "en" // fallback to English
 }
 
 // SendSuccess sends successful response

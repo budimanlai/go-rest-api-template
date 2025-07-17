@@ -2,6 +2,7 @@ package application
 
 import (
 	"fmt"
+	"go-rest-api-template/internal/middleware"
 	"go-rest-api-template/internal/routes"
 
 	"go-rest-api-template/pkg/database"
@@ -56,6 +57,13 @@ func RestApi(c *gocli.Cli) {
 		TimeFormat: "2006-Jan-02 15:04:05",
 		Format:     "${time} | :" + port + " | ${status} | ${latency} | ${ip} | ${method} | ${path} | ${error}\n${body}\n${resBody}\n\n",
 	}))
+
+	// Add i18n middleware
+	app.Use(middleware.I18nMiddleware(middleware.I18nConfig{
+		DefaultLanguage: "en",
+		SupportedLangs:  []string{"en", "id"},
+	}))
+
 	app.Use(keyauth.New(keyauth.Config{
 		KeyLookup: "header:x-api-key",
 		Validator: validateAPIKey,

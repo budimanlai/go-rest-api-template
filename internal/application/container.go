@@ -6,6 +6,8 @@ import (
 	"go-rest-api-template/internal/handler"
 	repositoryImpl "go-rest-api-template/internal/repository"
 	"go-rest-api-template/internal/service"
+	"go-rest-api-template/pkg/i18n"
+	"go-rest-api-template/pkg/response"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -14,6 +16,10 @@ import (
 type Container struct {
 	// Database
 	DB *sqlx.DB
+
+	// I18n
+	I18nManager    *i18n.Manager
+	ResponseHelper *response.I18nResponseHelper
 
 	// Repositories
 	UserRepo repository.UserRepository
@@ -32,11 +38,30 @@ func NewContainer(db *sqlx.DB) *Container {
 	}
 
 	// Initialize dependencies in order
+	container.initI18n()
 	container.initRepositories()
 	container.initServices()
 	container.initHandlers()
 
 	return container
+}
+
+// initI18n initializes internationalization
+func (c *Container) initI18n() {
+	i18nConfig := i18n.Config{
+		DefaultLanguage: "en",
+		LocalesPath:     "./locales",
+		SupportedLangs:  []string{"en", "id"},
+	}
+
+	manager, err := i18n.NewManager(i18nConfig)
+	if err != nil {
+		// Log error but don't fail startup
+		panic("Failed to initialize i18n: " + err.Error())
+	}
+
+	c.I18nManager = manager
+	c.ResponseHelper = response.NewI18nResponseHelper(manager)
 }
 
 // initRepositories initializes all repository implementations
@@ -51,7 +76,7 @@ func (c *Container) initServices() {
 
 // initHandlers initializes all HTTP handlers
 func (c *Container) initHandlers() {
-	c.UserHandler = handler.NewUserHandler(c.UserService)
+	c.UserHandler = handler.NewUserHandler(c.UserService, c.ResponseHelper)
 }
 
 // Future: Add more dependencies here

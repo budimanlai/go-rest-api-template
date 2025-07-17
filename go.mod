@@ -8,8 +8,10 @@ require (
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/gofiber/fiber/v2 v2.52.8
 	github.com/jmoiron/sqlx v1.4.0
+	github.com/nicksnyder/go-i18n/v2 v2.6.0
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/crypto v0.40.0
+	golang.org/x/text v0.27.0
 )
 
 require (

@@ -11,13 +11,15 @@ import (
 )
 
 type UserHandler struct {
-	userUsecase usecase.UserUsecase
+	userUsecase    usecase.UserUsecase
+	responseHelper *response.I18nResponseHelper
 }
 
 // NewUserHandler creates a new user handler
-func NewUserHandler(userUsecase usecase.UserUsecase) *UserHandler {
+func NewUserHandler(userUsecase usecase.UserUsecase, responseHelper *response.I18nResponseHelper) *UserHandler {
 	return &UserHandler{
-		userUsecase: userUsecase,
+		userUsecase:    userUsecase,
+		responseHelper: responseHelper,
 	}
 }
 
@@ -27,41 +29,45 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 
 	// Parse request body
 	if err := c.BodyParser(&req); err != nil {
-		return response.BadRequest(c, "Invalid request body", err.Error())
+		return h.responseHelper.ErrorWithI18n(c, fiber.StatusBadRequest, "invalid_request", nil)
 	}
 
 	// Validate request
 	if err := req.Validate(); err != nil {
-		return response.BadRequest(c, "Validation failed", err.Error())
+		return h.responseHelper.ErrorWithI18n(c, fiber.StatusBadRequest, "validation_failed", nil)
 	}
 
-	// Convert request to entity
+	// Convert to domain entity
 	user := &entity.User{
 		Username: req.Username,
 		Email:    req.Email,
 	}
 
-	// Hash password
+	// Hash password before saving
 	if err := user.HashPassword(req.Password); err != nil {
-		return response.BadRequest(c, "Password hashing failed", err.Error())
+		return h.responseHelper.ErrorWithI18n(c, fiber.StatusInternalServerError, "internal_server", nil)
 	}
 
 	// Create user
 	if err := h.userUsecase.CreateUser(c.Context(), user); err != nil {
-		return response.InternalServerError(c, "Failed to create user", err.Error())
+		if err.Error() == "username already exists" {
+			return h.responseHelper.ErrorWithI18n(c, fiber.StatusConflict, "username_exists", nil)
+		}
+		if err.Error() == "email already exists" {
+			return h.responseHelper.ErrorWithI18n(c, fiber.StatusConflict, "email_exists", nil)
+		}
+		return h.responseHelper.ErrorWithI18n(c, fiber.StatusInternalServerError, "internal_server", nil)
 	}
 
-	// Convert entity to response
+	// Convert to response model
 	userResponse := &model.UserResponse{
-		ID:        user.ID,
-		Username:  user.Username,
-		Email:     user.Email,
-		Status:    user.Status,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
+		ID:       user.ID,
+		Username: user.Username,
+		Email:    user.Email,
+		Status:   user.Status,
 	}
 
-	return response.Created(c, "User created successfully", userResponse)
+	return h.responseHelper.CreatedWithI18n(c, "user_created", userResponse, nil)
 }
 
 // GetUserByID handles GET /users/:id
