@@ -5,7 +5,7 @@ import (
 )
 
 type ApplicationContextBase struct {
-	// Add fields as needed for your application context
+	// Database connection
 	Db *sqlx.DB
 }
 

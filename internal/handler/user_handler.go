@@ -11,15 +11,13 @@ import (
 )
 
 type UserHandler struct {
-	userUsecase    usecase.UserUsecase
-	responseHelper *response.I18nResponseHelper
+	userUsecase usecase.UserUsecase
 }
 
 // NewUserHandler creates a new user handler
-func NewUserHandler(userUsecase usecase.UserUsecase, responseHelper *response.I18nResponseHelper) *UserHandler {
+func NewUserHandler(userUsecase usecase.UserUsecase) *UserHandler {
 	return &UserHandler{
-		userUsecase:    userUsecase,
-		responseHelper: responseHelper,
+		userUsecase: userUsecase,
 	}
 }
 
@@ -29,12 +27,12 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 
 	// Parse request body
 	if err := c.BodyParser(&req); err != nil {
-		return h.responseHelper.ErrorWithI18n(c, fiber.StatusBadRequest, "invalid_request", nil)
+		return response.ErrorWithI18n(c, fiber.StatusBadRequest, "invalid_request", nil)
 	}
 
 	// Validate request
 	if err := req.Validate(); err != nil {
-		return h.responseHelper.ErrorWithI18n(c, fiber.StatusBadRequest, "validation_failed", nil)
+		return response.ErrorWithI18n(c, fiber.StatusBadRequest, "validation_failed", nil)
 	}
 
 	// Convert to domain entity
@@ -45,18 +43,18 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 
 	// Hash password before saving
 	if err := user.HashPassword(req.Password); err != nil {
-		return h.responseHelper.ErrorWithI18n(c, fiber.StatusInternalServerError, "internal_server", nil)
+		return response.ErrorWithI18n(c, fiber.StatusInternalServerError, "internal_server", nil)
 	}
 
 	// Create user
 	if err := h.userUsecase.CreateUser(c.Context(), user); err != nil {
 		if err.Error() == "username already exists" {
-			return h.responseHelper.ErrorWithI18n(c, fiber.StatusConflict, "username_exists", nil)
+			return response.ErrorWithI18n(c, fiber.StatusConflict, "username_exists", nil)
 		}
 		if err.Error() == "email already exists" {
-			return h.responseHelper.ErrorWithI18n(c, fiber.StatusConflict, "email_exists", nil)
+			return response.ErrorWithI18n(c, fiber.StatusConflict, "email_exists", nil)
 		}
-		return h.responseHelper.ErrorWithI18n(c, fiber.StatusInternalServerError, "internal_server", nil)
+		return response.ErrorWithI18n(c, fiber.StatusInternalServerError, "internal_server", nil)
 	}
 
 	// Convert to response model
@@ -67,19 +65,19 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 		Status:   user.Status,
 	}
 
-	return h.responseHelper.CreatedWithI18n(c, "user_created", userResponse, nil)
+	return response.CreatedWithI18n(c, "user_created", userResponse, nil)
 }
 
 // GetUserByID handles GET /users/:id
 func (h *UserHandler) GetUserByID(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return h.responseHelper.ErrorWithI18n(c, 400, "invalid_user_id", nil)
+		return response.ErrorWithI18n(c, 400, "invalid_user_id", nil)
 	}
 
 	user, err := h.userUsecase.GetUserByID(c.Context(), id)
 	if err != nil {
-		return h.responseHelper.ErrorWithI18n(c, 404, "user_not_found", nil)
+		return response.ErrorWithI18n(c, 404, "user_not_found", nil)
 	}
 
 	// Convert entity to response
@@ -92,7 +90,7 @@ func (h *UserHandler) GetUserByID(c *fiber.Ctx) error {
 		UpdatedAt: user.UpdatedAt,
 	}
 
-	return h.responseHelper.SuccessWithI18n(c, "user_retrieved", userResponse, nil)
+	return response.SuccessWithI18n(c, "user_retrieved", userResponse, nil)
 }
 
 // GetAllUsers handles GET /users
@@ -109,13 +107,13 @@ func (h *UserHandler) GetAllUsers(c *fiber.Ctx) error {
 	// Get users
 	users, err := h.userUsecase.GetAllUsers(c.Context(), limit, offset)
 	if err != nil {
-		return h.responseHelper.ErrorWithI18n(c, 500, "failed_retrieve_users", nil)
+		return response.ErrorWithI18n(c, 500, "failed_retrieve_users", nil)
 	}
 
 	// Get total count for pagination
 	totalCount, err := h.userUsecase.GetUserCount(c.Context())
 	if err != nil {
-		return h.responseHelper.ErrorWithI18n(c, 500, "failed_get_user_count", nil)
+		return response.ErrorWithI18n(c, 500, "failed_get_user_count", nil)
 	}
 
 	// Convert entities to responses
@@ -143,24 +141,24 @@ func (h *UserHandler) GetAllUsers(c *fiber.Ctx) error {
 		},
 	}
 
-	return h.responseHelper.SuccessWithI18n(c, "users_retrieved", paginationData, nil)
+	return response.SuccessWithI18n(c, "users_retrieved", paginationData, nil)
 }
 
 // UpdateUser handles PUT /users/:id
 func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return h.responseHelper.ErrorWithI18n(c, 400, "invalid_user_id", nil)
+		return response.ErrorWithI18n(c, 400, "invalid_user_id", nil)
 	}
 
 	var req model.UserUpdateRequest
 	if err := c.BodyParser(&req); err != nil {
-		return h.responseHelper.ErrorWithI18n(c, 400, "invalid_request_body", nil)
+		return response.ErrorWithI18n(c, 400, "invalid_request_body", nil)
 	}
 
 	// Validate request
 	if err := req.Validate(); err != nil {
-		return h.responseHelper.ErrorWithI18n(c, 400, "validation_failed", nil)
+		return response.ErrorWithI18n(c, 400, "validation_failed", nil)
 	}
 
 	// Convert request to entity
@@ -174,19 +172,19 @@ func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 	// Hash password if provided
 	if req.Password != "" {
 		if err := user.HashPassword(req.Password); err != nil {
-			return h.responseHelper.ErrorWithI18n(c, 400, "password_hashing_failed", nil)
+			return response.ErrorWithI18n(c, 400, "password_hashing_failed", nil)
 		}
 	}
 
 	// Update user
 	if err := h.userUsecase.UpdateUser(c.Context(), user); err != nil {
-		return h.responseHelper.ErrorWithI18n(c, 500, "failed_update_user", nil)
+		return response.ErrorWithI18n(c, 500, "failed_update_user", nil)
 	}
 
 	// Get updated user
 	updatedUser, err := h.userUsecase.GetUserByID(c.Context(), id)
 	if err != nil {
-		return h.responseHelper.ErrorWithI18n(c, 500, "failed_retrieve_updated_user", nil)
+		return response.ErrorWithI18n(c, 500, "failed_retrieve_updated_user", nil)
 	}
 
 	// Convert entity to response
@@ -199,21 +197,21 @@ func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 		UpdatedAt: updatedUser.UpdatedAt,
 	}
 
-	return h.responseHelper.SuccessWithI18n(c, "user_updated", userResponse, nil)
+	return response.SuccessWithI18n(c, "user_updated", userResponse, nil)
 }
 
 // DeleteUser handles DELETE /users/:id
 func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return h.responseHelper.ErrorWithI18n(c, 400, "invalid_user_id", nil)
+		return response.ErrorWithI18n(c, 400, "invalid_user_id", nil)
 	}
 
 	if err := h.userUsecase.DeleteUser(c.Context(), id); err != nil {
-		return h.responseHelper.ErrorWithI18n(c, 500, "failed_delete_user", nil)
+		return response.ErrorWithI18n(c, 500, "failed_delete_user", nil)
 	}
 
-	return h.responseHelper.SuccessWithI18n(c, "user_deleted", nil, nil)
+	return response.SuccessWithI18n(c, "user_deleted", nil, nil)
 }
 
 // ForgotPassword handles POST /users/forgot-password
@@ -222,20 +220,20 @@ func (h *UserHandler) ForgotPassword(c *fiber.Ctx) error {
 
 	// Parse request body
 	if err := c.BodyParser(&req); err != nil {
-		return h.responseHelper.ErrorWithI18n(c, 400, "invalid_request_body", nil)
+		return response.ErrorWithI18n(c, 400, "invalid_request_body", nil)
 	}
 
 	// Validate request
 	if err := req.Validate(); err != nil {
-		return h.responseHelper.ErrorWithI18n(c, 400, "validation_failed", nil)
+		return response.ErrorWithI18n(c, 400, "validation_failed", nil)
 	}
 
 	// Process forgot password
 	if err := h.userUsecase.ForgotPassword(c.Context(), req.Email); err != nil {
-		return h.responseHelper.ErrorWithI18n(c, 500, "failed_forgot_password", nil)
+		return response.ErrorWithI18n(c, 500, "failed_forgot_password", nil)
 	}
 
-	return h.responseHelper.SuccessWithI18n(c, "reset_password_sent", nil, nil)
+	return response.SuccessWithI18n(c, "reset_password_sent", nil, nil)
 }
 
 // ResetPassword handles POST /users/reset-password
@@ -244,17 +242,17 @@ func (h *UserHandler) ResetPassword(c *fiber.Ctx) error {
 
 	// Parse request body
 	if err := c.BodyParser(&req); err != nil {
-		return h.responseHelper.ErrorWithI18n(c, 400, "invalid_request_body", nil)
+		return response.ErrorWithI18n(c, 400, "invalid_request_body", nil)
 	}
 
 	// Validate request
 	if err := req.Validate(); err != nil {
-		return h.responseHelper.ErrorWithI18n(c, 400, "validation_failed", nil)
+		return response.ErrorWithI18n(c, 400, "validation_failed", nil)
 	}
 
 	// Process reset password
 	if err := h.userUsecase.ResetPassword(c.Context(), req.Token, req.NewPassword); err != nil {
-		return h.responseHelper.ErrorWithI18n(c, 400, "reset_password_failed", nil)
+		return response.ErrorWithI18n(c, 400, "reset_password_failed", nil)
 	}
 
 	return response.Success(c, "Password reset successfully", nil)
@@ -264,17 +262,17 @@ func (h *UserHandler) ResetPassword(c *fiber.Ctx) error {
 func (h *UserHandler) ChangePassword(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return h.responseHelper.ErrorWithI18n(c, 400, "invalid_user_id", nil)
+		return response.ErrorWithI18n(c, 400, "invalid_user_id", nil)
 	}
 
 	var req model.ChangePasswordRequest
 	if err := c.BodyParser(&req); err != nil {
-		return h.responseHelper.ErrorWithI18n(c, 400, "invalid_request_body", nil)
+		return response.ErrorWithI18n(c, 400, "invalid_request_body", nil)
 	}
 
 	// Validate request
 	if err := req.Validate(); err != nil {
-		return h.responseHelper.ErrorWithI18n(c, 400, "validation_failed", nil)
+		return response.ErrorWithI18n(c, 400, "validation_failed", nil)
 	}
 
 	// Process change password

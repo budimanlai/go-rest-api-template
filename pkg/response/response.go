@@ -43,11 +43,47 @@ type I18nResponseHelper struct {
 	i18nManager *i18n.Manager
 }
 
+// Global I18n response helper instance
+var GlobalI18nResponseHelper *I18nResponseHelper
+
 // NewI18nResponseHelper creates new i18n response helper
 func NewI18nResponseHelper(manager *i18n.Manager) *I18nResponseHelper {
 	return &I18nResponseHelper{
 		i18nManager: manager,
 	}
+}
+
+// Global helper functions that use the global instance
+
+// SuccessWithI18n creates success response with i18n message using global helper
+func SuccessWithI18n(c *fiber.Ctx, messageKey string, data interface{}, templateData map[string]interface{}) error {
+	if GlobalI18nResponseHelper != nil {
+		return GlobalI18nResponseHelper.SuccessWithI18n(c, messageKey, data, templateData)
+	}
+	// Fallback to regular response
+	return Success(c, messageKey, data)
+}
+
+// ErrorWithI18n creates error response with i18n message using global helper
+func ErrorWithI18n(c *fiber.Ctx, status int, errorKey string, templateData map[string]interface{}) error {
+	if GlobalI18nResponseHelper != nil {
+		return GlobalI18nResponseHelper.ErrorWithI18n(c, status, errorKey, templateData)
+	}
+	// Fallback to regular response
+	return c.Status(status).JSON(StandardResponse{
+		Success: false,
+		Message: errorKey,
+		Error:   errorKey,
+	})
+}
+
+// CreatedWithI18n creates 201 response with i18n message using global helper
+func CreatedWithI18n(c *fiber.Ctx, messageKey string, data interface{}, templateData map[string]interface{}) error {
+	if GlobalI18nResponseHelper != nil {
+		return GlobalI18nResponseHelper.CreatedWithI18n(c, messageKey, data, templateData)
+	}
+	// Fallback to regular response
+	return Created(c, messageKey, data)
 }
 
 // SuccessWithI18n creates success response with i18n message

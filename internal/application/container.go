@@ -4,6 +4,7 @@ import (
 	"go-rest-api-template/internal/domain/repository"
 	"go-rest-api-template/internal/domain/usecase"
 	"go-rest-api-template/internal/handler"
+	"go-rest-api-template/internal/middleware"
 	repositoryImpl "go-rest-api-template/internal/repository"
 	"go-rest-api-template/internal/service"
 	"go-rest-api-template/pkg/i18n"
@@ -24,8 +25,7 @@ type Container struct {
 	privateTokenExpiry int
 
 	// I18n
-	I18nManager    *i18n.Manager
-	ResponseHelper *response.I18nResponseHelper
+	I18nManager *i18n.Manager
 
 	// Repositories
 	UserRepo   repository.UserRepository
@@ -75,7 +75,15 @@ func (c *Container) initI18n() {
 	}
 
 	c.I18nManager = manager
-	c.ResponseHelper = response.NewI18nResponseHelper(manager)
+
+	// Create response helper and set it globally
+	responseHelper := response.NewI18nResponseHelper(manager)
+
+	// Set global middleware helper to avoid import cycle
+	middleware.SetGlobalI18nResponseHelper(responseHelper)
+
+	// Set global response helper for direct usage in handlers
+	response.GlobalI18nResponseHelper = responseHelper
 }
 
 // initRepositories initializes all repository implementations
@@ -93,8 +101,8 @@ func (c *Container) initServices() {
 
 // initHandlers initializes all HTTP handlers
 func (c *Container) initHandlers() {
-	c.UserHandler = handler.NewUserHandler(c.UserService, c.ResponseHelper)
-	c.AuthHandler = handler.NewAuthHandler(c.UserService, c.JWTService, c.ApiKeyService, c.ResponseHelper)
+	c.UserHandler = handler.NewUserHandler(c.UserService)
+	c.AuthHandler = handler.NewAuthHandler(c.UserService, c.JWTService, c.ApiKeyService)
 }
 
 // Future: Add more dependencies here

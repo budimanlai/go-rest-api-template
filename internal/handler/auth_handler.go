@@ -13,19 +13,17 @@ import (
 
 // AuthHandler handles authentication endpoints
 type AuthHandler struct {
-	userService    usecase.UserUsecase
-	jwtService     service.JWTService
-	apiKeyService  service.ApiKeyService
-	responseHelper *response.I18nResponseHelper
+	userService   usecase.UserUsecase
+	jwtService    service.JWTService
+	apiKeyService service.ApiKeyService
 }
 
 // NewAuthHandler creates a new auth handler
-func NewAuthHandler(userService usecase.UserUsecase, jwtService service.JWTService, apiKeyService service.ApiKeyService, responseHelper *response.I18nResponseHelper) *AuthHandler {
+func NewAuthHandler(userService usecase.UserUsecase, jwtService service.JWTService, apiKeyService service.ApiKeyService) *AuthHandler {
 	return &AuthHandler{
-		userService:    userService,
-		jwtService:     jwtService,
-		apiKeyService:  apiKeyService,
-		responseHelper: responseHelper,
+		userService:   userService,
+		jwtService:    jwtService,
+		apiKeyService: apiKeyService,
 	}
 }
 
@@ -71,12 +69,12 @@ func (h *AuthHandler) GetPublicToken(c *fiber.Ctx) error {
 	// Get API key from context (should be set by middleware)
 	apiKeyID, ok := c.Locals("api_key_id").(int)
 	if !ok {
-		return h.responseHelper.ErrorWithI18n(c, fiber.StatusBadRequest, "api_key_required", nil)
+		return response.ErrorWithI18n(c, fiber.StatusBadRequest, "api_key_required", nil)
 	}
 
 	apiKeyName, ok := c.Locals("api_key_name").(string)
 	if !ok {
-		return h.responseHelper.ErrorWithI18n(c, fiber.StatusBadRequest, "api_key_invalid", nil)
+		return response.ErrorWithI18n(c, fiber.StatusBadRequest, "api_key_invalid", nil)
 	}
 
 	// Create API key entity for token generation
@@ -88,25 +86,25 @@ func (h *AuthHandler) GetPublicToken(c *fiber.Ctx) error {
 	// Generate public token
 	publicToken, err := h.jwtService.GeneratePublicToken(apiKey)
 	if err != nil {
-		return h.responseHelper.ErrorWithI18n(c, fiber.StatusInternalServerError, "token_generation_failed", map[string]interface{}{
+		return response.ErrorWithI18n(c, fiber.StatusInternalServerError, "token_generation_failed", map[string]interface{}{
 			"error": err.Error(),
 		})
 	}
 
-	response := PublicTokenResponse{
+	tokenResponse := PublicTokenResponse{
 		PublicToken: publicToken,
 		ExpiresIn:   2 * 3600, // 2 hours in seconds
 		TokenType:   "Bearer",
 	}
 
-	return h.responseHelper.SuccessWithI18n(c, "public_token_generated", response, nil)
+	return response.SuccessWithI18n(c, "public_token_generated", tokenResponse, nil)
 }
 
 // Login handles user authentication and returns private token
 func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	var req LoginRequest
 	if err := c.BodyParser(&req); err != nil {
-		return h.responseHelper.ErrorWithI18n(c, fiber.StatusBadRequest, "invalid_request", nil)
+		return response.ErrorWithI18n(c, fiber.StatusBadRequest, "invalid_request", nil)
 	}
 
 	// Validate request
@@ -115,7 +113,7 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 		Password: req.Password,
 	}
 	if err := loginReq.Validate(); err != nil {
-		return h.responseHelper.ErrorWithI18n(c, fiber.StatusBadRequest, "validation_failed", map[string]interface{}{
+		return response.ErrorWithI18n(c, fiber.StatusBadRequest, "validation_failed", map[string]interface{}{
 			"error": err.Error(),
 		})
 	}
@@ -123,18 +121,18 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	// Get API key from context (should be set by middleware)
 	apiKeyID, ok := c.Locals("api_key_id").(int)
 	if !ok {
-		return h.responseHelper.ErrorWithI18n(c, fiber.StatusBadRequest, "api_key_required", nil)
+		return response.ErrorWithI18n(c, fiber.StatusBadRequest, "api_key_required", nil)
 	}
 
 	apiKeyName, ok := c.Locals("api_key_name").(string)
 	if !ok {
-		return h.responseHelper.ErrorWithI18n(c, fiber.StatusBadRequest, "api_key_invalid", nil)
+		return response.ErrorWithI18n(c, fiber.StatusBadRequest, "api_key_invalid", nil)
 	}
 
 	// Authenticate user (note: user service now returns empty token)
 	user, _, err := h.userService.Login(c.Context(), req.Username, req.Password)
 	if err != nil {
-		return h.responseHelper.ErrorWithI18n(c, fiber.StatusUnauthorized, "login_failed", map[string]interface{}{
+		return response.ErrorWithI18n(c, fiber.StatusUnauthorized, "login_failed", map[string]interface{}{
 			"error": err.Error(),
 		})
 	}
@@ -148,7 +146,7 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	// Generate private token (contains API key + user info)
 	privateToken, err := h.jwtService.GeneratePrivateToken(apiKey, user)
 	if err != nil {
-		return h.responseHelper.ErrorWithI18n(c, fiber.StatusInternalServerError, "token_generation_failed", map[string]interface{}{
+		return response.ErrorWithI18n(c, fiber.StatusInternalServerError, "token_generation_failed", map[string]interface{}{
 			"error": err.Error(),
 		})
 	}
@@ -163,26 +161,26 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 		UpdatedAt: user.UpdatedAt,
 	}
 
-	response := LoginResponse{
+	loginResponse := LoginResponse{
 		User:  userResponse,
 		Token: privateToken, // This is now a private token
 	}
 
-	return h.responseHelper.SuccessWithI18n(c, "login_success", response, nil)
+	return response.SuccessWithI18n(c, "login_success", loginResponse, nil)
 }
 
 // Register handles user registration
 func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	var req RegisterRequest
 	if err := c.BodyParser(&req); err != nil {
-		return h.responseHelper.ErrorWithI18n(c, fiber.StatusBadRequest, "invalid_request_body", map[string]interface{}{
+		return response.ErrorWithI18n(c, fiber.StatusBadRequest, "invalid_request_body", map[string]interface{}{
 			"error": err.Error(),
 		})
 	}
 
 	// Validate request
 	if err := validator.ValidateStruct(&req); err != nil {
-		return h.responseHelper.ErrorWithI18n(c, fiber.StatusBadRequest, "validation_failed", map[string]interface{}{
+		return response.ErrorWithI18n(c, fiber.StatusBadRequest, "validation_failed", map[string]interface{}{
 			"errors": err,
 		})
 	}
@@ -190,12 +188,12 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	// Get API key info from context for user creation
 	apiKeyID, ok := c.Locals("api_key_id").(int)
 	if !ok {
-		return h.responseHelper.ErrorWithI18n(c, fiber.StatusBadRequest, "api_key_required", nil)
+		return response.ErrorWithI18n(c, fiber.StatusBadRequest, "api_key_required", nil)
 	}
 
 	apiKeyName, ok := c.Locals("api_key_name").(string)
 	if !ok {
-		return h.responseHelper.ErrorWithI18n(c, fiber.StatusBadRequest, "api_key_invalid", nil)
+		return response.ErrorWithI18n(c, fiber.StatusBadRequest, "api_key_invalid", nil)
 	}
 
 	// Create user entity
@@ -207,14 +205,14 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 
 	// Set password (will be hashed)
 	if err := user.HashPassword(req.Password); err != nil {
-		return h.responseHelper.ErrorWithI18n(c, fiber.StatusInternalServerError, "password_hash_failed", map[string]interface{}{
+		return response.ErrorWithI18n(c, fiber.StatusInternalServerError, "password_hash_failed", map[string]interface{}{
 			"error": err.Error(),
 		})
 	}
 
 	// Create user through usecase
 	if err := h.userService.CreateUser(c.Context(), user); err != nil {
-		return h.responseHelper.ErrorWithI18n(c, fiber.StatusInternalServerError, "registration_failed", map[string]interface{}{
+		return response.ErrorWithI18n(c, fiber.StatusInternalServerError, "registration_failed", map[string]interface{}{
 			"error": err.Error(),
 		})
 	}
@@ -228,7 +226,7 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	// Generate private token for new user
 	privateToken, err := h.jwtService.GeneratePrivateToken(apiKey, user)
 	if err != nil {
-		return h.responseHelper.ErrorWithI18n(c, fiber.StatusInternalServerError, "token_generation_failed", map[string]interface{}{
+		return response.ErrorWithI18n(c, fiber.StatusInternalServerError, "token_generation_failed", map[string]interface{}{
 			"error": err.Error(),
 		})
 	}
@@ -243,39 +241,39 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 		UpdatedAt: user.UpdatedAt,
 	}
 
-	response := LoginResponse{
+	loginResponse := LoginResponse{
 		User:  userResponse,
 		Token: privateToken,
 	}
 
-	return h.responseHelper.SuccessWithI18n(c, "registration_success", response, nil)
+	return response.SuccessWithI18n(c, "registration_success", loginResponse, nil)
 }
 
 // RefreshToken handles token refresh
 func (h *AuthHandler) RefreshToken(c *fiber.Ctx) error {
 	var req RefreshTokenRequest
 	if err := c.BodyParser(&req); err != nil {
-		return h.responseHelper.ErrorWithI18n(c, fiber.StatusBadRequest, "invalid_request", nil)
+		return response.ErrorWithI18n(c, fiber.StatusBadRequest, "invalid_request", nil)
 	}
 
 	// Refresh token
 	newToken, err := h.userService.RefreshToken(c.Context(), req.Token)
 	if err != nil {
-		return h.responseHelper.ErrorWithI18n(c, fiber.StatusUnauthorized, "token_refresh_failed", map[string]interface{}{
+		return response.ErrorWithI18n(c, fiber.StatusUnauthorized, "token_refresh_failed", map[string]interface{}{
 			"error": err.Error(),
 		})
 	}
 
-	response := RefreshTokenResponse{
+	refreshResponse := RefreshTokenResponse{
 		Token: newToken,
 	}
 
-	return h.responseHelper.SuccessWithI18n(c, "token_refresh_success", response, nil)
+	return response.SuccessWithI18n(c, "token_refresh_success", refreshResponse, nil)
 }
 
 // Logout handles user logout (optional - for token blacklist in the future)
 func (h *AuthHandler) Logout(c *fiber.Ctx) error {
 	// For JWT, logout is typically handled client-side by removing the token
 	// In the future, you could implement token blacklisting here
-	return h.responseHelper.SuccessWithI18n(c, "logout_success", nil, nil)
+	return response.SuccessWithI18n(c, "logout_success", nil, nil)
 }

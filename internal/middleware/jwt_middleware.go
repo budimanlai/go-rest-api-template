@@ -9,55 +9,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// ApiKeyOnlyMiddleware validates only API keys for public auth endpoints (register/login)
-// This follows industry best practices where register/login endpoints don't require JWT tokens
-func ApiKeyOnlyMiddleware(apiKeyService service.ApiKeyService) fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		// Get API key from X-API-Key header or Authorization header
-		apiKey := c.Get("X-API-Key")
-		if apiKey == "" {
-			// Try from Authorization header as API key (not Bearer token)
-			auth := c.Get("Authorization")
-			if strings.HasPrefix(auth, "ApiKey ") {
-				apiKey = strings.TrimPrefix(auth, "ApiKey ")
-			}
-		}
-
-		if apiKey == "" {
-			return response.BadRequest(c, "API key is required", "")
-		}
-
-		// Validate API key
-		ctx := context.Background()
-		apiKeyEntity, err := apiKeyService.ValidateApiKey(ctx, apiKey)
-		if err != nil {
-			return response.InternalServerError(c, "Internal server error", err.Error())
-		}
-
-		if apiKeyEntity == nil {
-			return response.BadRequest(c, "Invalid or inactive API key", "")
-		}
-
-		// Check IP whitelist if configured
-		clientIP := c.IP()
-		if !apiKeyEntity.IsIPWhitelisted(clientIP) {
-			return response.BadRequest(c, "IP address not whitelisted", "")
-		}
-
-		// Store API key info in context
-		c.Locals("api_key_id", apiKeyEntity.ID)
-		c.Locals("api_key_name", apiKeyEntity.Name)
-		c.Locals("api_key_h2h", apiKeyEntity.IsH2HEnabled())
-
-		// Log API key access (async)
-		go func() {
-			_ = apiKeyService.LogApiKeyAccess(context.Background(), apiKeyEntity.ID)
-		}()
-
-		return c.Next()
-	}
-}
-
 // PublicMiddleware validates API keys for public endpoints and optionally validates public JWT tokens
 func PublicMiddleware(apiKeyService service.ApiKeyService, jwtService service.JWTService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
