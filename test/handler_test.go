@@ -42,6 +42,12 @@ func createTestResponseHelper() *response.I18nResponseHelper {
 	return response.NewI18nResponseHelper(manager)
 }
 
+// setupTestGlobalHelpers sets up global helpers for testing
+func setupTestGlobalHelpers() {
+	responseHelper := createTestResponseHelper()
+	response.GlobalI18nResponseHelper = responseHelper
+}
+
 // createSimpleResponseHelper creates a response helper with minimal setup
 func createSimpleResponseHelper() *response.I18nResponseHelper {
 	// For testing, we'll create a basic setup
@@ -137,10 +143,12 @@ func (m *MockUserUsecase) RefreshToken(ctx context.Context, tokenString string) 
 }
 
 func TestUserHandler_CreateUser(t *testing.T) {
+	// Setup global helpers first
+	setupTestGlobalHelpers()
+
 	// Setup
 	mockUsecase := new(MockUserUsecase)
-	responseHelper := createTestResponseHelper()
-	userHandler := handler.NewUserHandler(mockUsecase, responseHelper)
+	userHandler := handler.NewUserHandler(mockUsecase)
 
 	app := fiber.New()
 	app.Post("/users", userHandler.CreateUser)

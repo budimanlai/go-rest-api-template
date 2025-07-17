@@ -38,9 +38,12 @@ func ApiKeyMiddleware(apiKeyService service.ApiKeyService, responseHelper *respo
 
 		if apiKey == "" {
 			if responseHelper != nil {
-				return responseHelper.ErrorWithI18n(c, fiber.StatusBadRequest, "api_key_required", nil)
+				return responseHelper.ErrorWithI18n(c, fiber.StatusUnauthorized, "api_key_required", nil)
 			}
-			return response.BadRequest(c, "API key is required", "")
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"success": false,
+				"message": "API key is required",
+			})
 		}
 
 		// Validate API key
@@ -55,18 +58,24 @@ func ApiKeyMiddleware(apiKeyService service.ApiKeyService, responseHelper *respo
 
 		if apiKeyEntity == nil {
 			if responseHelper != nil {
-				return responseHelper.ErrorWithI18n(c, fiber.StatusBadRequest, "invalid_api_key", nil)
+				return responseHelper.ErrorWithI18n(c, fiber.StatusUnauthorized, "invalid_api_key", nil)
 			}
-			return response.BadRequest(c, "Invalid or inactive API key", "")
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"success": false,
+				"message": "Invalid or inactive API key",
+			})
 		}
 
 		// Check IP whitelist if configured
 		clientIP := c.IP()
 		if !apiKeyEntity.IsIPWhitelisted(clientIP) {
 			if responseHelper != nil {
-				return responseHelper.ErrorWithI18n(c, fiber.StatusBadRequest, "ip_not_whitelisted", nil)
+				return responseHelper.ErrorWithI18n(c, fiber.StatusUnauthorized, "ip_not_whitelisted", nil)
 			}
-			return response.BadRequest(c, "IP address not whitelisted", "")
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"success": false,
+				"message": "IP address not whitelisted",
+			})
 		}
 
 		// Store API key info in context for later use

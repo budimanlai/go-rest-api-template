@@ -3,6 +3,7 @@ package routes
 import (
 	"go-rest-api-template/internal/handler"
 	"go-rest-api-template/internal/service"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -19,6 +20,18 @@ type RouteConfig struct {
 
 // SetupAllRoutes automatically sets up all application routes
 func SetupAllRoutes(app *fiber.App, config *RouteConfig) {
+	// Setup health check endpoint (no middleware required)
+	app.Get("/api/v1/health", func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"success": true,
+			"message": "Service is healthy",
+			"data": fiber.Map{
+				"status":    "healthy",
+				"timestamp": time.Now().Format("2006-01-02 15:04:05"),
+			},
+		})
+	})
+
 	// Setup authentication routes
 	SetupAuthRoutes(app, config.AuthHandler, config.ApiKeyService, config.JWTService)
 
