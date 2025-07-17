@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"go-rest-api-template/cmd/migration"
 
 	application "go-rest-api-template/internal/application"
 
@@ -15,6 +16,10 @@ func main() {
 		ConfigFile: []string{"configs/config.json"},
 	})
 
+	// Register migration commands
+	migration.RegisterCommands(cli)
+
+	// Register service commands
 	cli.StartService("run", "start", application.RestApi)
 	cli.StopService("stop")
 

@@ -48,11 +48,12 @@ test/                      # Test files
 - ✅ **Clean Architecture** with proper layering
 - ✅ **Go Fiber** v2 web framework
 - ✅ **MySQL** database with SQLX
+- ✅ **Database Migration** system with versioning
 - ✅ **API Key Authentication** middleware
 - ✅ **Request/Response** logging
 - ✅ **Graceful Shutdown**
 - ✅ **Configuration Management**
-- ✅ **Input Validation**
+- ✅ **Input Validation** with go-playground/validator v10
 - ✅ **Standardized Responses**
 - ✅ **Database Connection Pooling**
 - ✅ **Error Handling**
@@ -111,7 +112,19 @@ Edit `configs/config.json`:
 }
 ```
 
-### 3. Build & Run
+### 3. Database Migration
+```bash
+# Apply all pending migrations
+./rest-api migrate-up
+
+# Check migration status
+./rest-api migrate-status
+
+# Create new migration
+./rest-api migrate-create --name=create_products_table
+```
+
+### 4. Build & Run
 ```bash
 # Build
 go build -o rest-api ./cmd/api
@@ -120,7 +133,7 @@ go build -o rest-api ./cmd/api
 ./rest-api run --port=8080
 ```
 
-### 4. Test API
+### 5. Test API
 ```bash
 # Valid API key
 curl -X GET http://127.0.0.1:8080/api/health \
@@ -344,8 +357,17 @@ export DATABASE_PASS=password
 export DATABASE_NAME=myapp
 ```
 
-## 📚 Learning Resources
+## 📚 Documentation & Learning Resources
 
+### **Template Guides**
+- [📖 Migration Guide](docs/MIGRATION_GUIDE.md) - Database schema versioning
+- [🌍 i18n Guide](docs/I18N_GUIDE.md) - Multilingual implementation  
+- [🧪 Validator Guide](docs/VALIDATOR_GUIDE.md) - Input validation patterns
+- [📦 Container Guide](docs/CONTAINER_GUIDE.md) - Dependency injection
+- [📋 Example Implementation](docs/EXAMPLE.md) - Complete CRUD example
+- [🔗 User API Documentation](docs/USER_API.md) - API endpoint reference
+
+### **External Resources**
 - [Clean Architecture by Robert Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 - [Go Fiber Documentation](https://docs.gofiber.io/)
 - [SQLX Documentation](http://jmoiron.github.io/sqlx/)
