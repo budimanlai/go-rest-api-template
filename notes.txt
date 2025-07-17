@@ -1,0 +1,4 @@
+Saya ingin menambahkan middleware JWT untuk authorisasi. authorisasi ada 2 macam
+1. Untuk halaman guest seperti login, register, reset password, dsb. 
+dimana user tidak perlu login untuk mengakses endpoint tersebut
+2. Halaman private: untuk halaman ini user perlu login terlebih dahulu untuk mendapatkan token session
