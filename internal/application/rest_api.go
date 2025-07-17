@@ -64,7 +64,7 @@ func RestApi(c *gocli.Cli) {
 	}))
 
 	// Initialize dependencies using dependency injection container
-	container := NewContainer(db)
+	container := NewContainer(db, c)
 
 	// Setup all routes using route manager
 	routeConfig := &routes.RouteConfig{

@@ -9,6 +9,7 @@
 │   └── handler_test.go            ✅ Handler tests
 ├── tools/
 │   └── apikey_auth_tester.go      ✅ CLI testing tool
+├── .env                          ✅ Environment configuration
 ├── postman_collection.json       ✅ Postman collection
 └── manual_test_guide.sh          ✅ Shell script testing
 ```
@@ -18,17 +19,47 @@
 ### 1. **Unit Tests (Go Testing)**
 ```bash
 # Run specific ApiKeyOnlyMiddleware tests
-go test ./test -run TestApiKeyOnlyAuthentication -v
+make test-env
 
 # Run all tests
-go test ./test -v
+make test
 ```
 
 ### 2. **CLI Testing Tool**
 ```bash
 # Run standalone CLI tester
+make test-auth
+
+# Or manually
 go run tools/apikey_auth_tester.go
 ```
+
+## 🔧 **Environment Configuration (.env)**
+
+Testing tools now use `.env` file for configuration:
+
+### **Setup:**
+```bash
+# 1. Copy example file
+cp .env.example .env
+
+# 2. Edit .env with your actual values
+# Get TEST_API_KEY from your database api_key table
+```
+
+### **Configuration:**
+```bash
+# .env file content
+TEST_API_KEY=your_actual_api_key_from_database
+TEST_BASE_URL=http://localhost:8080
+```
+
+### **Benefits:**
+- ✅ **Secure**: API keys tidak hardcoded dan tidak masuk git
+- ✅ **Flexible**: Easy to change for different environments  
+- ✅ **Standard**: Industry best practice
+- ✅ **Team-friendly**: Each developer can have their own .env
+- ✅ **Safe**: .env in .gitignore, .env.example as template
 
 ### 3. **Postman Collection**
 ```bash

@@ -76,6 +76,17 @@ test:
 	@echo "Running tests..."
 	@$(GOTEST) -v ./...
 
+## Run API authentication tests (requires server running)
+test-auth:
+	@echo "Running API authentication tests..."
+	@go run tools/apikey_auth_tester.go
+
+## Run tests with .env configuration
+test-env:
+	@echo "Running tests with .env configuration..."
+	@if [ ! -f .env ]; then echo "❌ .env file not found. Please create one with TEST_API_KEY and TEST_BASE_URL"; exit 1; fi
+	@$(GOTEST) -v ./test -run TestApiKeyOnlyAuthentication
+
 ## Run tests with coverage
 test-coverage:
 	@echo "Running tests with coverage..."

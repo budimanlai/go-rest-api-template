@@ -5,18 +5,41 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
+	"os"
 	"testing"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	apiKeyTestURL = "http://localhost:3000"
-	testAPIKey    = "test-api-key-12345"
+var (
+	apiKeyTestURL string
+	testAPIKey    string
 )
+
+// init loads environment variables
+func init() {
+	// Load .env file
+	if err := godotenv.Load("../.env"); err != nil {
+		log.Printf("Warning: Error loading .env file: %v", err)
+	}
+
+	// Get config from environment or use defaults
+	apiKeyTestURL = getEnvForApiKey("TEST_BASE_URL", "http://localhost:8080")
+	testAPIKey = getEnvForApiKey("TEST_API_KEY", "dev_api_key_12345678901234567890")
+}
+
+// getEnvForApiKey gets environment variable or returns default value
+func getEnvForApiKey(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
+}
 
 // TestApiKeyOnlyAuthentication tests the new ApiKeyOnlyMiddleware implementation
 func TestApiKeyOnlyAuthentication(t *testing.T) {

@@ -9,6 +9,7 @@ import (
 	"go-rest-api-template/pkg/i18n"
 	"go-rest-api-template/pkg/response"
 
+	gocli "github.com/budimanlai/go-cli"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -16,6 +17,11 @@ import (
 type Container struct {
 	// Database
 	DB *sqlx.DB
+
+	// JWT Configuration
+	jwtSecret          string
+	publicTokenExpiry  int
+	privateTokenExpiry int
 
 	// I18n
 	I18nManager    *i18n.Manager
@@ -36,9 +42,13 @@ type Container struct {
 }
 
 // NewContainer creates and initializes all dependencies
-func NewContainer(db *sqlx.DB) *Container {
+func NewContainer(db *sqlx.DB, config *gocli.Cli) *Container {
 	container := &Container{
 		DB: db,
+		// Initialize JWT configuration from config file
+		jwtSecret:          config.Config.GetString("jwt.secret"),
+		publicTokenExpiry:  config.Config.GetInt("jwt.public_token_expiry_hours"),
+		privateTokenExpiry: config.Config.GetInt("jwt.private_token_expiry_hours"),
 	}
 
 	// Initialize dependencies in order
@@ -76,14 +86,8 @@ func (c *Container) initRepositories() {
 
 // initServices initializes all service implementations
 func (c *Container) initServices() {
-	// Initialize JWT service with configuration
-	// TODO: Move these to config file
-	jwtSecret := "your-super-secret-jwt-key-change-this-in-production"
-	publicTokenExpiry := 2   // 2 hours for public tokens
-	privateTokenExpiry := 24 // 24 hours for private tokens
-
 	c.ApiKeyService = service.NewApiKeyService(c.ApiKeyRepo)
-	c.JWTService = service.NewJWTService(jwtSecret, publicTokenExpiry, privateTokenExpiry, c.ApiKeyService)
+	c.JWTService = service.NewJWTService(c.jwtSecret, c.publicTokenExpiry, c.privateTokenExpiry, c.ApiKeyService)
 	c.UserService = service.NewUserService(c.UserRepo, c.JWTService)
 }
 

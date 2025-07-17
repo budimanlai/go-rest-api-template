@@ -5,19 +5,41 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"testing"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	baseURL = "http://localhost:8080"
-	apiKey  = "test-api-key"
+var (
+	baseURL string
+	apiKey  string
 )
+
+// init loads environment variables
+func init() {
+	// Load .env file
+	if err := godotenv.Load("../.env"); err != nil {
+		log.Printf("Warning: Error loading .env file: %v", err)
+	}
+
+	// Get config from environment or use defaults
+	baseURL = getEnv("TEST_BASE_URL", "http://localhost:8080")
+	apiKey = getEnv("TEST_API_KEY", "dev_api_key_12345678901234567890")
+}
+
+// getEnv gets environment variable or returns default value
+func getEnv(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
+}
 
 // TestUser represents test user data
 type TestUser struct {

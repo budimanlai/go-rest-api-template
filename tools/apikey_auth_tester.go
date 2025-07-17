@@ -1,5 +1,5 @@
 // ApiKey Only Authentication CLI Tester
-// Following industry best practices (Strapi, GitHub, Twitter/X approach)
+// Following industry best practices (Stripa, GitHub, Twitter/X approach)
 //
 // Usage: go run tools/apikey_auth_tester.go
 package main
@@ -9,14 +9,38 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
+	"os"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
-const (
-	testBaseURL = "http://localhost:3000"
-	testAPIKey  = "test-api-key-12345"
+var (
+	testBaseURL string
+	testAPIKey  string
 )
+
+// init loads environment variables
+func init() {
+	// Load .env file
+	if err := godotenv.Load(); err != nil {
+		log.Printf("Warning: Error loading .env file: %v", err)
+	}
+
+	// Get config from environment or use defaults
+	testBaseURL = getEnv("TEST_BASE_URL", "http://localhost:8080")
+	testAPIKey = getEnv("TEST_API_KEY", "dev_api_key_12345678901234567890")
+}
+
+// getEnv gets environment variable or returns default value
+func getEnv(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
+}
 
 type APIResponse struct {
 	Status  bool        `json:"status"`

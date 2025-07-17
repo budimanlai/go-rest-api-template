@@ -2,7 +2,16 @@
 
 A production-ready REST API template built with Go, following Clean Architecture principles and best practices.
 
-## 🏗️ Architecture
+## 🏗### 5. Build & Run
+```bash
+# Build
+go build -o rest-api ./cmd/api
+
+# Run
+./rest-api run --port=8080
+```
+
+### 6. Test APIture
 
 This template follows **Clean Architecture** with clear separation of concerns:
 
@@ -108,11 +117,27 @@ Edit `configs/config.json`:
         "host": "127.0.0.1",
         "port": 8080,
         "debug": true
+    },
+    "jwt": {
+        "secret": "your-super-secret-jwt-key-change-this-in-production",
+        "public_token_expiry_hours": 2,
+        "private_token_expiry_hours": 24,
+        "issuer": "go-rest-api"
     }
 }
 ```
 
-### 3. Database Migration
+### 3. Environment Setup
+Create `.env` file for testing (copy from `.env.example`):
+```bash
+# Copy example file
+cp .env.example .env
+
+# Edit with your actual values
+# Get TEST_API_KEY from your database api_key table
+```
+
+### 4. Database Migration
 ```bash
 # Apply all pending migrations
 ./rest-api migrate-up
@@ -124,7 +149,7 @@ Edit `configs/config.json`:
 ./rest-api migrate-create --name=create_products_table
 ```
 
-### 4. Build & Run
+### 5. Build & Run
 ```bash
 # Build
 go build -o rest-api ./cmd/api
