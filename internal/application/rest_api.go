@@ -2,10 +2,7 @@ package application
 
 import (
 	"fmt"
-	"go-rest-api-template/internal/handler"
-	"go-rest-api-template/internal/repository"
 	"go-rest-api-template/internal/routes"
-	"go-rest-api-template/internal/service"
 
 	"go-rest-api-template/pkg/database"
 
@@ -70,18 +67,17 @@ func RestApi(c *gocli.Cli) {
 		},
 	}))
 
-	// Initialize dependencies using dependency injection
-	// Repository layer
-	userRepo := repository.NewUserRepository(db)
+	// Initialize dependencies using dependency injection container
+	container := NewContainer(db)
 
-	// Service layer (Business logic)
-	userService := service.NewUserService(userRepo)
-
-	// Handler layer (HTTP controllers)
-	userHandler := handler.NewUserHandler(userService)
-
-	// Setup routes
-	routes.SetupUserRoutes(app, userHandler)
+	// Setup all routes using route manager
+	routeConfig := &routes.RouteConfig{
+		UserHandler: container.UserHandler,
+		// Future: Add more handlers here
+		// ProductHandler: container.ProductHandler,
+		// OrderHandler:   container.OrderHandler,
+	}
+	routes.SetupAllRoutes(app, routeConfig)
 
 	if err := app.Listen(":" + port); err != nil {
 		c.Log(fmt.Sprintf("Failed to start server: %v", err))
