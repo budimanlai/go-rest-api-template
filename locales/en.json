@@ -19,6 +19,15 @@
   "error.database_error": "Database error occurred",
   "error.invalid_request": "Invalid request data",
   "error.invalid_user_id": "Invalid user ID",
+  "error.invalid_request_body": "Invalid request body",
+  "error.password_hashing_failed": "Password hashing failed",
+  "error.failed_retrieve_users": "Failed to retrieve users",
+  "error.failed_get_user_count": "Failed to get user count", 
+  "error.failed_update_user": "Failed to update user",
+  "error.failed_retrieve_updated_user": "Failed to retrieve updated user",
+  "error.failed_delete_user": "Failed to delete user",
+  "error.failed_forgot_password": "Failed to process forgot password",
+  "error.reset_password_failed": "Reset password failed",
 
   "success.user_created": "User created successfully",
   "success.user_updated": "User updated successfully", 
@@ -28,6 +37,7 @@
   "success.password_reset": "Password reset successfully",
   "success.users_retrieved": "Users retrieved successfully",
   "success.user_retrieved": "User retrieved successfully",
+  "success.reset_password_sent": "Reset password instructions sent to your email",
 
   "validation.required": "{{.Field}} is required",
   "validation.min_length": "{{.Field}} must be at least {{.MinLength}} characters",

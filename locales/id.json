@@ -19,6 +19,15 @@
   "error.database_error": "Terjadi kesalahan database",
   "error.invalid_request": "Data permintaan tidak valid",
   "error.invalid_user_id": "ID pengguna tidak valid",
+  "error.invalid_request_body": "Badan permintaan tidak valid",
+  "error.password_hashing_failed": "Hashing password gagal",
+  "error.failed_retrieve_users": "Gagal mengambil data pengguna",
+  "error.failed_get_user_count": "Gagal mendapatkan jumlah pengguna", 
+  "error.failed_update_user": "Gagal memperbarui pengguna",
+  "error.failed_retrieve_updated_user": "Gagal mengambil data pengguna yang diperbarui",
+  "error.failed_delete_user": "Gagal menghapus pengguna",
+  "error.failed_forgot_password": "Gagal memproses lupa password",
+  "error.reset_password_failed": "Reset password gagal",
 
   "success.user_created": "Pengguna berhasil dibuat",
   "success.user_updated": "Pengguna berhasil diperbarui", 
@@ -28,6 +37,7 @@
   "success.password_reset": "Password berhasil direset",
   "success.users_retrieved": "Data pengguna berhasil diambil",
   "success.user_retrieved": "Data pengguna berhasil diambil",
+  "success.reset_password_sent": "Instruksi reset password telah dikirim ke email Anda",
 
   "validation.required": "{{.Field}} diperlukan",
   "validation.min_length": "{{.Field}} harus minimal {{.MinLength}} karakter",

@@ -16,12 +16,14 @@ CREATE TABLE IF NOT EXISTS users (
     created_by INT NULL,
     updated_by INT NULL,
     deleted_by INT NULL,
+    deleted_at TIMESTAMP NULL,
     
     INDEX idx_email (email),
     INDEX idx_username (username),
     INDEX idx_status (status),
     INDEX idx_reset_token (reset_password_token),
-    INDEX idx_reset_expires (reset_password_expires_at)
+    INDEX idx_reset_expires (reset_password_expires_at),
+    INDEX idx_deleted_at (deleted_at)
 );
 
 -- API Keys table

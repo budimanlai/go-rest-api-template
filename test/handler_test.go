@@ -7,6 +7,8 @@ import (
 	"go-rest-api-template/internal/domain/entity"
 	"go-rest-api-template/internal/handler"
 	"go-rest-api-template/internal/model"
+	"go-rest-api-template/pkg/i18n"
+	"go-rest-api-template/pkg/response"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -19,6 +21,39 @@ import (
 // MockUserUsecase is a mock implementation of UserUsecase
 type MockUserUsecase struct {
 	mock.Mock
+}
+
+// createTestResponseHelper creates a response helper for testing with minimal i18n setup
+func createTestResponseHelper() *response.I18nResponseHelper {
+	// Create a simple i18n manager for testing
+	config := i18n.Config{
+		DefaultLanguage: "en",
+		LocalesPath:     "../locales", // Relative to test directory
+		SupportedLangs:  []string{"en"},
+	}
+
+	// Create manager (if fails, create nil manager for basic testing)
+	manager, err := i18n.NewManager(config)
+	if err != nil {
+		// For testing, create a simple manager that just returns keys
+		return createSimpleResponseHelper()
+	}
+
+	return response.NewI18nResponseHelper(manager)
+}
+
+// createSimpleResponseHelper creates a response helper with minimal setup
+func createSimpleResponseHelper() *response.I18nResponseHelper {
+	// For testing, we'll create a basic setup
+	// This is a workaround since we can't easily mock the concrete types
+	config := i18n.Config{
+		DefaultLanguage: "en",
+		LocalesPath:     ".",
+		SupportedLangs:  []string{"en"},
+	}
+
+	manager, _ := i18n.NewManager(config)
+	return response.NewI18nResponseHelper(manager)
 }
 
 func (m *MockUserUsecase) CreateUser(ctx context.Context, user *entity.User) error {
@@ -91,7 +126,8 @@ func (m *MockUserUsecase) ChangePassword(ctx context.Context, userID int, curren
 func TestUserHandler_CreateUser(t *testing.T) {
 	// Setup
 	mockUsecase := new(MockUserUsecase)
-	userHandler := handler.NewUserHandler(mockUsecase)
+	responseHelper := createTestResponseHelper()
+	userHandler := handler.NewUserHandler(mockUsecase, responseHelper)
 
 	app := fiber.New()
 	app.Post("/users", userHandler.CreateUser)

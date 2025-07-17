@@ -74,12 +74,12 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 func (h *UserHandler) GetUserByID(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return response.BadRequest(c, "Invalid user ID", err.Error())
+		return h.responseHelper.ErrorWithI18n(c, 400, "invalid_user_id", nil)
 	}
 
 	user, err := h.userUsecase.GetUserByID(c.Context(), id)
 	if err != nil {
-		return response.NotFound(c, "User not found", err.Error())
+		return h.responseHelper.ErrorWithI18n(c, 404, "user_not_found", nil)
 	}
 
 	// Convert entity to response
@@ -92,7 +92,7 @@ func (h *UserHandler) GetUserByID(c *fiber.Ctx) error {
 		UpdatedAt: user.UpdatedAt,
 	}
 
-	return response.Success(c, "User retrieved successfully", userResponse)
+	return h.responseHelper.SuccessWithI18n(c, "user_retrieved", userResponse, nil)
 }
 
 // GetAllUsers handles GET /users
@@ -109,13 +109,13 @@ func (h *UserHandler) GetAllUsers(c *fiber.Ctx) error {
 	// Get users
 	users, err := h.userUsecase.GetAllUsers(c.Context(), limit, offset)
 	if err != nil {
-		return response.InternalServerError(c, "Failed to retrieve users", err.Error())
+		return h.responseHelper.ErrorWithI18n(c, 500, "failed_retrieve_users", nil)
 	}
 
 	// Get total count for pagination
 	totalCount, err := h.userUsecase.GetUserCount(c.Context())
 	if err != nil {
-		return response.InternalServerError(c, "Failed to get user count", err.Error())
+		return h.responseHelper.ErrorWithI18n(c, 500, "failed_get_user_count", nil)
 	}
 
 	// Convert entities to responses
@@ -143,24 +143,24 @@ func (h *UserHandler) GetAllUsers(c *fiber.Ctx) error {
 		},
 	}
 
-	return response.Success(c, "Users retrieved successfully", paginationData)
+	return h.responseHelper.SuccessWithI18n(c, "users_retrieved", paginationData, nil)
 }
 
 // UpdateUser handles PUT /users/:id
 func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return response.BadRequest(c, "Invalid user ID", err.Error())
+		return h.responseHelper.ErrorWithI18n(c, 400, "invalid_user_id", nil)
 	}
 
 	var req model.UserUpdateRequest
 	if err := c.BodyParser(&req); err != nil {
-		return response.BadRequest(c, "Invalid request body", err.Error())
+		return h.responseHelper.ErrorWithI18n(c, 400, "invalid_request_body", nil)
 	}
 
 	// Validate request
 	if err := req.Validate(); err != nil {
-		return response.BadRequest(c, "Validation failed", err.Error())
+		return h.responseHelper.ErrorWithI18n(c, 400, "validation_failed", nil)
 	}
 
 	// Convert request to entity
@@ -174,19 +174,19 @@ func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 	// Hash password if provided
 	if req.Password != "" {
 		if err := user.HashPassword(req.Password); err != nil {
-			return response.BadRequest(c, "Password hashing failed", err.Error())
+			return h.responseHelper.ErrorWithI18n(c, 400, "password_hashing_failed", nil)
 		}
 	}
 
 	// Update user
 	if err := h.userUsecase.UpdateUser(c.Context(), user); err != nil {
-		return response.InternalServerError(c, "Failed to update user", err.Error())
+		return h.responseHelper.ErrorWithI18n(c, 500, "failed_update_user", nil)
 	}
 
 	// Get updated user
 	updatedUser, err := h.userUsecase.GetUserByID(c.Context(), id)
 	if err != nil {
-		return response.InternalServerError(c, "Failed to retrieve updated user", err.Error())
+		return h.responseHelper.ErrorWithI18n(c, 500, "failed_retrieve_updated_user", nil)
 	}
 
 	// Convert entity to response
@@ -199,21 +199,21 @@ func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 		UpdatedAt: updatedUser.UpdatedAt,
 	}
 
-	return response.Success(c, "User updated successfully", userResponse)
+	return h.responseHelper.SuccessWithI18n(c, "user_updated", userResponse, nil)
 }
 
 // DeleteUser handles DELETE /users/:id
 func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return response.BadRequest(c, "Invalid user ID", err.Error())
+		return h.responseHelper.ErrorWithI18n(c, 400, "invalid_user_id", nil)
 	}
 
 	if err := h.userUsecase.DeleteUser(c.Context(), id); err != nil {
-		return response.InternalServerError(c, "Failed to delete user", err.Error())
+		return h.responseHelper.ErrorWithI18n(c, 500, "failed_delete_user", nil)
 	}
 
-	return response.Success(c, "User deleted successfully", nil)
+	return h.responseHelper.SuccessWithI18n(c, "user_deleted", nil, nil)
 }
 
 // ForgotPassword handles POST /users/forgot-password
@@ -222,20 +222,20 @@ func (h *UserHandler) ForgotPassword(c *fiber.Ctx) error {
 
 	// Parse request body
 	if err := c.BodyParser(&req); err != nil {
-		return response.BadRequest(c, "Invalid request body", err.Error())
+		return h.responseHelper.ErrorWithI18n(c, 400, "invalid_request_body", nil)
 	}
 
 	// Validate request
 	if err := req.Validate(); err != nil {
-		return response.BadRequest(c, "Validation failed", err.Error())
+		return h.responseHelper.ErrorWithI18n(c, 400, "validation_failed", nil)
 	}
 
 	// Process forgot password
 	if err := h.userUsecase.ForgotPassword(c.Context(), req.Email); err != nil {
-		return response.InternalServerError(c, "Failed to process forgot password", err.Error())
+		return h.responseHelper.ErrorWithI18n(c, 500, "failed_forgot_password", nil)
 	}
 
-	return response.Success(c, "Reset password instructions sent to your email", nil)
+	return h.responseHelper.SuccessWithI18n(c, "reset_password_sent", nil, nil)
 }
 
 // ResetPassword handles POST /users/reset-password
@@ -244,17 +244,17 @@ func (h *UserHandler) ResetPassword(c *fiber.Ctx) error {
 
 	// Parse request body
 	if err := c.BodyParser(&req); err != nil {
-		return response.BadRequest(c, "Invalid request body", err.Error())
+		return h.responseHelper.ErrorWithI18n(c, 400, "invalid_request_body", nil)
 	}
 
 	// Validate request
 	if err := req.Validate(); err != nil {
-		return response.BadRequest(c, "Validation failed", err.Error())
+		return h.responseHelper.ErrorWithI18n(c, 400, "validation_failed", nil)
 	}
 
 	// Process reset password
 	if err := h.userUsecase.ResetPassword(c.Context(), req.Token, req.NewPassword); err != nil {
-		return response.BadRequest(c, "Reset password failed", err.Error())
+		return h.responseHelper.ErrorWithI18n(c, 400, "reset_password_failed", nil)
 	}
 
 	return response.Success(c, "Password reset successfully", nil)
@@ -264,17 +264,17 @@ func (h *UserHandler) ResetPassword(c *fiber.Ctx) error {
 func (h *UserHandler) ChangePassword(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return response.BadRequest(c, "Invalid user ID", err.Error())
+		return h.responseHelper.ErrorWithI18n(c, 400, "invalid_user_id", nil)
 	}
 
 	var req model.ChangePasswordRequest
 	if err := c.BodyParser(&req); err != nil {
-		return response.BadRequest(c, "Invalid request body", err.Error())
+		return h.responseHelper.ErrorWithI18n(c, 400, "invalid_request_body", nil)
 	}
 
 	// Validate request
 	if err := req.Validate(); err != nil {
-		return response.BadRequest(c, "Validation failed", err.Error())
+		return h.responseHelper.ErrorWithI18n(c, 400, "validation_failed", nil)
 	}
 
 	// Process change password
