@@ -43,7 +43,9 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 
 	// Hash password before saving
 	if err := user.HashPassword(req.Password); err != nil {
-		return response.ErrorWithI18n(c, fiber.StatusInternalServerError, "internal_server", nil)
+		return response.ErrorWithI18n(c, fiber.StatusInternalServerError, "internal_server", map[string]interface{}{
+			"error": err.Error(),
+		})
 	}
 
 	// Create user
@@ -54,7 +56,9 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 		if err.Error() == "email already exists" {
 			return response.ErrorWithI18n(c, fiber.StatusConflict, "email_exists", nil)
 		}
-		return response.ErrorWithI18n(c, fiber.StatusInternalServerError, "internal_server", nil)
+		return response.ErrorWithI18n(c, fiber.StatusInternalServerError, "internal_server", map[string]interface{}{
+			"error": err.Error(),
+		})
 	}
 
 	// Convert to response model
@@ -77,7 +81,9 @@ func (h *UserHandler) GetUserByID(c *fiber.Ctx) error {
 
 	user, err := h.userUsecase.GetUserByID(c.Context(), id)
 	if err != nil {
-		return response.ErrorWithI18n(c, 404, "user_not_found", nil)
+		return response.ErrorWithI18n(c, 404, "user_not_found", map[string]interface{}{
+			"error": err.Error(),
+		})
 	}
 
 	// Convert entity to response
@@ -107,13 +113,17 @@ func (h *UserHandler) GetAllUsers(c *fiber.Ctx) error {
 	// Get users
 	users, err := h.userUsecase.GetAllUsers(c.Context(), limit, offset)
 	if err != nil {
-		return response.ErrorWithI18n(c, 500, "failed_retrieve_users", nil)
+		return response.ErrorWithI18n(c, 500, "failed_retrieve_users", map[string]interface{}{
+			"error": err.Error(),
+		})
 	}
 
 	// Get total count for pagination
 	totalCount, err := h.userUsecase.GetUserCount(c.Context())
 	if err != nil {
-		return response.ErrorWithI18n(c, 500, "failed_get_user_count", nil)
+		return response.ErrorWithI18n(c, 500, "failed_get_user_count", map[string]interface{}{
+			"error": err.Error(),
+		})
 	}
 
 	// Convert entities to responses
@@ -172,19 +182,25 @@ func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 	// Hash password if provided
 	if req.Password != "" {
 		if err := user.HashPassword(req.Password); err != nil {
-			return response.ErrorWithI18n(c, 400, "password_hashing_failed", nil)
+			return response.ErrorWithI18n(c, 400, "password_hashing_failed", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}
 
 	// Update user
 	if err := h.userUsecase.UpdateUser(c.Context(), user); err != nil {
-		return response.ErrorWithI18n(c, 500, "failed_update_user", nil)
+		return response.ErrorWithI18n(c, 500, "failed_update_user", map[string]interface{}{
+			"error": err.Error(),
+		})
 	}
 
 	// Get updated user
 	updatedUser, err := h.userUsecase.GetUserByID(c.Context(), id)
 	if err != nil {
-		return response.ErrorWithI18n(c, 500, "failed_retrieve_updated_user", nil)
+		return response.ErrorWithI18n(c, 500, "failed_retrieve_updated_user", map[string]interface{}{
+			"error": err.Error(),
+		})
 	}
 
 	// Convert entity to response
@@ -208,7 +224,9 @@ func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {
 	}
 
 	if err := h.userUsecase.DeleteUser(c.Context(), id); err != nil {
-		return response.ErrorWithI18n(c, 500, "failed_delete_user", nil)
+		return response.ErrorWithI18n(c, 500, "failed_delete_user", map[string]interface{}{
+			"error": err.Error(),
+		})
 	}
 
 	return response.SuccessWithI18n(c, "user_deleted", nil, nil)
@@ -230,7 +248,9 @@ func (h *UserHandler) ForgotPassword(c *fiber.Ctx) error {
 
 	// Process forgot password
 	if err := h.userUsecase.ForgotPassword(c.Context(), req.Email); err != nil {
-		return response.ErrorWithI18n(c, 500, "failed_forgot_password", nil)
+		return response.ErrorWithI18n(c, 500, "failed_forgot_password", map[string]interface{}{
+			"error": err.Error(),
+		})
 	}
 
 	return response.SuccessWithI18n(c, "reset_password_sent", nil, nil)

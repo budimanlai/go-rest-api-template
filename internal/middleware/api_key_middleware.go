@@ -51,7 +51,9 @@ func ApiKeyMiddleware(apiKeyService service.ApiKeyService, responseHelper *respo
 		apiKeyEntity, err := apiKeyService.ValidateApiKey(ctx, apiKey)
 		if err != nil {
 			if responseHelper != nil {
-				return responseHelper.ErrorWithI18n(c, fiber.StatusInternalServerError, "internal_server", nil)
+				return responseHelper.ErrorWithI18n(c, fiber.StatusInternalServerError, "internal_server", map[string]interface{}{
+					"error": err.Error(),
+				})
 			}
 			return response.InternalServerError(c, "Internal server error", err.Error())
 		}
@@ -111,7 +113,9 @@ func AuthKeyMiddleware(apiKeyService service.ApiKeyService, responseHelper *resp
 		apiKeyEntity, err := apiKeyService.ValidateAuthKey(ctx, authKey)
 		if err != nil {
 			if responseHelper != nil {
-				return responseHelper.ErrorWithI18n(c, fiber.StatusInternalServerError, "internal_server", nil)
+				return responseHelper.ErrorWithI18n(c, fiber.StatusInternalServerError, "internal_server", map[string]interface{}{
+					"error": err.Error(),
+				})
 			}
 			return response.InternalServerError(c, "Internal server error", err.Error())
 		}

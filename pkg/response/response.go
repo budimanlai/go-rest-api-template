@@ -1,7 +1,11 @@
 package response
 
 import (
+	"fmt"
 	"go-rest-api-template/pkg/i18n"
+	"go-rest-api-template/pkg/logger"
+	"runtime"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -66,6 +70,9 @@ func SuccessWithI18n(c *fiber.Ctx, messageKey string, data interface{}, template
 
 // ErrorWithI18n creates error response with i18n message using global helper
 func ErrorWithI18n(c *fiber.Ctx, status int, errorKey string, templateData map[string]interface{}) error {
+	// Log the error with caller information
+	logErrorWithCaller(status, errorKey, templateData)
+
 	if GlobalI18nResponseHelper != nil {
 		return GlobalI18nResponseHelper.ErrorWithI18n(c, status, errorKey, templateData)
 	}
@@ -75,6 +82,67 @@ func ErrorWithI18n(c *fiber.Ctx, status int, errorKey string, templateData map[s
 		Message: errorKey,
 		Error:   errorKey,
 	})
+}
+
+// logErrorWithCaller logs error with file and line information
+func logErrorWithCaller(status int, errorKey string, templateData map[string]interface{}) {
+	// Get caller information - we need to skip more levels to get to the actual handler
+	var file string
+	var line int
+	var funcName string
+
+	// Try different skip levels to find the handler function
+	for skip := 2; skip <= 6; skip++ {
+		pc, f, l, ok := runtime.Caller(skip)
+		if !ok {
+			continue
+		}
+
+		// Get function name
+		fn := runtime.FuncForPC(pc)
+		if fn != nil {
+			funcName = fn.Name()
+			// If we find a handler function, use this location
+			if strings.Contains(funcName, "handler") || strings.Contains(funcName, "Handler") {
+				file = f
+				line = l
+				break
+			}
+		}
+
+		// Fallback to first valid caller
+		if file == "" {
+			file = f
+			line = l
+		}
+	}
+
+	if file == "" {
+		file = "unknown"
+		line = 0
+	}
+
+	// Get just the filename, not the full path
+	parts := strings.Split(file, "/")
+	filename := parts[len(parts)-1]
+
+	// Create concise error message
+	errorMsg := fmt.Sprintf("HTTP %d: %s at %s:%d", status, errorKey, filename, line)
+
+	if funcName != "" {
+		// Extract just the function name from full path
+		funcParts := strings.Split(funcName, ".")
+		shortFuncName := funcParts[len(funcParts)-1]
+		errorMsg += fmt.Sprintf(" in %s()", shortFuncName)
+	}
+
+	// Add template data if available
+	if len(templateData) > 0 {
+		errorMsg += fmt.Sprintf(" | Data: %+v", templateData)
+	}
+
+	// Log without stack trace for cleaner output
+	logger.Error("%s", errorMsg)
 }
 
 // CreatedWithI18n creates 201 response with i18n message using global helper
@@ -100,6 +168,9 @@ func (h *I18nResponseHelper) SuccessWithI18n(c *fiber.Ctx, messageKey string, da
 
 // ErrorWithI18n creates error response with i18n message
 func (h *I18nResponseHelper) ErrorWithI18n(c *fiber.Ctx, status int, errorKey string, templateData map[string]interface{}) error {
+	// Auto-log this error before processing
+	logErrorWithCaller(status, errorKey, templateData)
+
 	lang := getLanguageFromContext(c)
 	message := h.i18nManager.TranslateError(lang, errorKey, templateData)
 
@@ -124,6 +195,12 @@ func (h *I18nResponseHelper) CreatedWithI18n(c *fiber.Ctx, messageKey string, da
 
 // ValidationErrorWithI18n creates validation error response with i18n
 func (h *I18nResponseHelper) ValidationErrorWithI18n(c *fiber.Ctx, errors []ValidationError) error {
+	// Auto-log validation errors
+	templateData := map[string]interface{}{
+		"validation_errors": errors,
+	}
+	logErrorWithCaller(fiber.StatusBadRequest, "validation_failed", templateData)
+
 	lang := getLanguageFromContext(c)
 
 	// Translate each validation error
@@ -169,6 +246,13 @@ func SendSuccess(c *fiber.Ctx, message string, data interface{}) error {
 
 // SendError sends error response
 func SendError(c *fiber.Ctx, statusCode int, message string, err error) error {
+	// Auto-log this error
+	templateData := map[string]interface{}{}
+	if err != nil {
+		templateData["error"] = err.Error()
+	}
+	logErrorWithCaller(statusCode, message, templateData)
+
 	response := StandardResponse{
 		Success: false,
 		Message: message,
@@ -209,6 +293,13 @@ func Created(c *fiber.Ctx, message string, data interface{}) error {
 
 // BadRequest sends 400 Bad Request response
 func BadRequest(c *fiber.Ctx, message string, err string) error {
+	// Auto-log this error
+	templateData := map[string]interface{}{}
+	if err != "" {
+		templateData["error"] = err
+	}
+	logErrorWithCaller(fiber.StatusBadRequest, message, templateData)
+
 	return c.Status(fiber.StatusBadRequest).JSON(StandardResponse{
 		Success: false,
 		Message: message,
@@ -218,6 +309,13 @@ func BadRequest(c *fiber.Ctx, message string, err string) error {
 
 // NotFound sends 404 Not Found response
 func NotFound(c *fiber.Ctx, message string, err string) error {
+	// Auto-log this error
+	templateData := map[string]interface{}{}
+	if err != "" {
+		templateData["error"] = err
+	}
+	logErrorWithCaller(fiber.StatusNotFound, message, templateData)
+
 	return c.Status(fiber.StatusNotFound).JSON(StandardResponse{
 		Success: false,
 		Message: message,
@@ -227,6 +325,13 @@ func NotFound(c *fiber.Ctx, message string, err string) error {
 
 // InternalServerError sends 500 Internal Server Error response
 func InternalServerError(c *fiber.Ctx, message string, err string) error {
+	// Auto-log this error with stack trace
+	templateData := map[string]interface{}{}
+	if err != "" {
+		templateData["error"] = err
+	}
+	logErrorWithCaller(fiber.StatusInternalServerError, message, templateData)
+
 	return c.Status(fiber.StatusInternalServerError).JSON(StandardResponse{
 		Success: false,
 		Message: message,

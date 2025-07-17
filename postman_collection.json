@@ -3,26 +3,20 @@
 		"name": "Go REST API - JWT Authentication",
 		"description": "Complete testing collection for Go REST API with 2-tier JWT authentication system",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"version": "2.0.0"
+		"version": "3.0.0"
 	},
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "http://localhost:3000",
+			"value": "http://localhost:8080",
 			"type": "string",
 			"description": "Base URL of the API server"
 		},
 		{
 			"key": "api_key",
-			"value": "test-api-key-12345",
+			"value": "TDG_rxm8yuy1XLpTeDcIB3dsUsWlD2QR",
 			"type": "string",
 			"description": "Valid API key for testing"
-		},
-		{
-			"key": "public_token",
-			"value": "",
-			"type": "string",
-			"description": "Public JWT token (API key only)"
 		},
 		{
 			"key": "private_token",
@@ -31,46 +25,18 @@
 			"description": "Private JWT token (API key + user info)"
 		},
 		{
-			"key": "user_email",
-			"value": "test@example.com",
+			"key": "user_id",
+			"value": "",
 			"type": "string",
-			"description": "Test user email"
-		},
-		{
-			"key": "user_password",
-			"value": "password123",
-			"type": "string",
-			"description": "Test user password"
+			"description": "User ID from registration/login"
 		}
 	],
 	"item": [
 		{
-			"name": "1. Get Public Token",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"if (pm.response.code === 200) {",
-							"    const response = pm.response.json();",
-							"    pm.collectionVariables.set('public_token', response.data.token);",
-							"    console.log('Public token saved:', response.data.token);",
-							"} else {",
-							"    console.log('Failed to get public token:', pm.response.text());",
-							"}"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
+			"name": "0. Health Check",
 			"request": {
 				"method": "GET",
 				"header": [
-					{
-						"key": "X-API-Key",
-						"value": "{{api_key}}",
-						"type": "text"
-					},
 					{
 						"key": "Accept",
 						"value": "application/json",
@@ -78,23 +44,27 @@
 					}
 				],
 				"url": {
-					"raw": "{{base_url}}/api/v1/public/auth/token",
+					"raw": "{{base_url}}/api/v1/health",
 					"host": ["{{base_url}}"],
-					"path": ["api", "v1", "public", "auth", "token"]
+					"path": ["api", "v1", "health"]
 				},
-				"description": "Get public JWT token using API key only"
+				"description": "Check if the API service is healthy and running"
 			},
 			"response": []
 		},
 		{
-			"name": "2. Register User",
+			"name": "1. Register User",
 			"event": [
 				{
 					"listen": "test",
 					"script": {
 						"exec": [
-							"if (pm.response.code === 201) {",
-							"    console.log('User registered successfully');",
+							"if (pm.response.code === 201 || pm.response.code === 200) {",
+							"    const response = pm.response.json();",
+							"    if (response.data && response.data.id) {",
+							"        pm.collectionVariables.set('user_id', response.data.id);",
+							"        console.log('User registered successfully, ID:', response.data.id);",
+							"    }",
 							"} else if (pm.response.code === 409) {",
 							"    console.log('User already exists, continuing...');",
 							"} else {",
@@ -121,19 +91,19 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"username\": \"testuser\",\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\",\n    \"full_name\": \"Test User\"\n}"
+					"raw": "{\n    \"username\": \"testuser123\",\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\",\n    \"full_name\": \"Test User\"\n}"
 				},
 				"url": {
 					"raw": "{{base_url}}/api/v1/public/auth/register",
 					"host": ["{{base_url}}"],
 					"path": ["api", "v1", "public", "auth", "register"]
 				},
-				"description": "Register a new user (API key only - following industry best practices)"
+				"description": "Register new user using API key authentication"
 			},
 			"response": []
 		},
 		{
-			"name": "3. Login User",
+			"name": "2. Login User",
 			"event": [
 				{
 					"listen": "test",
@@ -141,9 +111,13 @@
 						"exec": [
 							"if (pm.response.code === 200) {",
 							"    const response = pm.response.json();",
-							"    pm.collectionVariables.set('private_token', response.data.token);",
-							"    console.log('Private token saved:', response.data.token);",
-							"    console.log('User info:', response.data.user);",
+							"    if (response.data && response.data.token) {",
+							"        pm.collectionVariables.set('private_token', response.data.token);",
+							"        console.log('Login successful, token saved');",
+							"        if (response.data.user && response.data.user.id) {",
+							"            pm.collectionVariables.set('user_id', response.data.user.id);",
+							"        }",
+							"    }",
 							"} else {",
 							"    console.log('Login failed:', pm.response.text());",
 							"}"
@@ -168,60 +142,32 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"username\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\"\n}"
+					"raw": "{\n    \"username\": \"testuser123\",\n    \"password\": \"password123\"\n}"
 				},
 				"url": {
 					"raw": "{{base_url}}/api/v1/public/auth/login",
 					"host": ["{{base_url}}"],
 					"path": ["api", "v1", "public", "auth", "login"]
 				},
-				"description": "Login user and get private JWT token (API key only - simplified authentication)"
+				"description": "Login user and get private JWT token"
 			},
 			"response": []
 		},
 		{
-			"name": "4. Get All Users (Private)",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "X-API-Key",
-						"value": "{{api_key}}",
-						"type": "text"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{private_token}}",
-						"type": "text"
-					},
-					{
-						"key": "Accept",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"url": {
-					"raw": "{{base_url}}/api/v1/users",
-					"host": ["{{base_url}}"],
-					"path": ["api", "v1", "users"]
-				},
-				"description": "Get all users (requires private token)"
-			},
-			"response": []
-		},
-		{
-			"name": "5. Refresh Token",
+			"name": "3. Create User (Private)",
 			"event": [
 				{
 					"listen": "test",
 					"script": {
 						"exec": [
-							"if (pm.response.code === 200) {",
+							"if (pm.response.code === 201) {",
 							"    const response = pm.response.json();",
-							"    pm.collectionVariables.set('private_token', response.data.token);",
-							"    console.log('Token refreshed:', response.data.token);",
+							"    if (response.data && response.data.id) {",
+							"        pm.collectionVariables.set('created_user_id', response.data.id);",
+							"        console.log('User created successfully, ID:', response.data.id);",
+							"    }",
 							"} else {",
-							"    console.log('Token refresh failed:', pm.response.text());",
+							"    console.log('Create user failed:', pm.response.text());",
 							"}"
 						],
 						"type": "text/javascript"
@@ -247,19 +193,83 @@
 						"type": "text"
 					}
 				],
-				"url": {
-					"raw": "{{base_url}}/api/v1/public/auth/refresh",
-					"host": ["{{base_url}}"],
-					"path": ["api", "v1", "public", "auth", "refresh"]
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"newuser123\",\n    \"email\": \"newuser@example.com\",\n    \"password\": \"password123\"\n}"
 				},
-				"description": "Refresh JWT token"
+				"url": {
+					"raw": "{{base_url}}/api/v1/users",
+					"host": ["{{base_url}}"],
+					"path": ["api", "v1", "users"]
+				},
+				"description": "Create new user using private endpoint (requires JWT token)"
 			},
 			"response": []
 		},
 		{
-			"name": "6. Logout",
+			"name": "4. Get All Users",
 			"request": {
-				"method": "POST",
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-Key",
+						"value": "{{api_key}}",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{private_token}}",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/users",
+					"host": ["{{base_url}}"],
+					"path": ["api", "v1", "users"]
+				},
+				"description": "Get all users (requires authentication)"
+			},
+			"response": []
+		},
+		{
+			"name": "5. Get User by ID",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-API-Key",
+						"value": "{{api_key}}",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{private_token}}",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/users/{{user_id}}",
+					"host": ["{{base_url}}"],
+					"path": ["api", "v1", "users", "{{user_id}}"]
+				},
+				"description": "Get specific user by ID (requires authentication)"
+			},
+			"response": []
+		},
+		{
+			"name": "6. Update User",
+			"request": {
+				"method": "PUT",
 				"header": [
 					{
 						"key": "X-API-Key",
@@ -277,64 +287,23 @@
 						"type": "text"
 					}
 				],
-				"url": {
-					"raw": "{{base_url}}/api/v1/public/auth/logout",
-					"host": ["{{base_url}}"],
-					"path": ["api", "v1", "public", "auth", "logout"]
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"updateduser123\",\n    \"email\": \"updated@example.com\"\n}"
 				},
-				"description": "Logout user and invalidate token"
+				"url": {
+					"raw": "{{base_url}}/api/v1/users/{{user_id}}",
+					"host": ["{{base_url}}"],
+					"path": ["api", "v1", "users", "{{user_id}}"]
+				},
+				"description": "Update user information (requires authentication)"
 			},
 			"response": []
 		},
 		{
-			"name": "Test - Invalid API Key",
+			"name": "7. Delete User",
 			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "X-API-Key",
-						"value": "invalid-api-key",
-						"type": "text"
-					},
-					{
-						"key": "Accept",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"url": {
-					"raw": "{{base_url}}/api/v1/public/auth/token",
-					"host": ["{{base_url}}"],
-					"path": ["api", "v1", "public", "auth", "token"]
-				},
-				"description": "Test with invalid API key (should fail)"
-			},
-			"response": []
-		},
-		{
-			"name": "Test - No API Key",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Accept",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"url": {
-					"raw": "{{base_url}}/api/v1/public/auth/token",
-					"host": ["{{base_url}}"],
-					"path": ["api", "v1", "public", "auth", "token"]
-				},
-				"description": "Test without API key (should fail)"
-			},
-			"response": []
-		},
-		{
-			"name": "Test - Access Private with Public Token",
-			"request": {
-				"method": "GET",
+				"method": "DELETE",
 				"header": [
 					{
 						"key": "X-API-Key",
@@ -343,23 +312,151 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Bearer {{public_token}}",
+						"value": "Bearer {{private_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/users/{{user_id}}",
+					"host": ["{{base_url}}"],
+					"path": ["api", "v1", "users", "{{user_id}}"]
+				},
+				"description": "Delete user (requires authentication)"
+			},
+			"response": []
+		},
+		{
+			"name": "8. Logout",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-Key",
+						"value": "{{api_key}}",
 						"type": "text"
 					},
 					{
-						"key": "Accept",
+						"key": "Content-Type",
 						"value": "application/json",
 						"type": "text"
 					}
 				],
 				"url": {
-					"raw": "{{base_url}}/api/v1/users",
+					"raw": "{{base_url}}/api/v1/public/auth/logout",
 					"host": ["{{base_url}}"],
-					"path": ["api", "v1", "users"]
+					"path": ["api", "v1", "public", "auth", "logout"]
 				},
-				"description": "Test accessing private endpoint with public token (should fail)"
+				"description": "Logout user (invalidate token)"
 			},
 			"response": []
+		},
+		{
+			"name": "Error Cases",
+			"item": [
+				{
+					"name": "Invalid API Key",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "invalid-api-key",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users"]
+						},
+						"description": "Test with invalid API key (should return 401)"
+					},
+					"response": []
+				},
+				{
+					"name": "Missing API Key",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users"]
+						},
+						"description": "Test without API key (should return 401)"
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid JWT Token",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{api_key}}",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer invalid-jwt-token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users"]
+						},
+						"description": "Test with invalid JWT token (should return 401)"
+					},
+					"response": []
+				},
+				{
+					"name": "Access Private Endpoint Without JWT",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{api_key}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users"]
+						},
+						"description": "Test private endpoint without JWT token (should return 401)"
+					},
+					"response": []
+				}
+			],
+			"description": "Test error handling and edge cases"
+		}
+	],
+	"auth": {
+		"type": "noauth"
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
 		}
 	]
 }

@@ -29,7 +29,7 @@ func (r *userRepositoryImpl) Create(ctx context.Context, user *entity.User) erro
 		CreatedBy:    user.CreatedBy,
 	}
 
-	query := `INSERT INTO users (username, email, password_hash, status, created_by, created_at, updated_at) 
+	query := `INSERT INTO user (username, email, password_hash, status, created_by, created_at, updated_at) 
 			  VALUES (:username, :email, :password_hash, :status, :created_by, NOW(), NOW())`
 
 	result, err := r.db.NamedExecContext(ctx, query, userModel)
@@ -47,7 +47,7 @@ func (r *userRepositoryImpl) Create(ctx context.Context, user *entity.User) erro
 func (r *userRepositoryImpl) GetByID(ctx context.Context, id int) (*entity.User, error) {
 	var userModel model.UserModel
 
-	query := `SELECT * FROM users WHERE id = ? AND deleted_at IS NULL`
+	query := `SELECT * FROM user WHERE id = ? AND deleted_at IS NULL`
 	err := r.db.GetContext(ctx, &userModel, query, id)
 	if err != nil {
 		return nil, err
@@ -73,7 +73,7 @@ func (r *userRepositoryImpl) GetByID(ctx context.Context, id int) (*entity.User,
 func (r *userRepositoryImpl) GetByEmail(ctx context.Context, email string) (*entity.User, error) {
 	var userModel model.UserModel
 
-	query := `SELECT * FROM users WHERE email = ? AND deleted_at IS NULL`
+	query := `SELECT * FROM user WHERE email = ? AND deleted_at IS NULL`
 	err := r.db.GetContext(ctx, &userModel, query, email)
 	if err != nil {
 		return nil, err
@@ -97,7 +97,7 @@ func (r *userRepositoryImpl) GetByEmail(ctx context.Context, email string) (*ent
 func (r *userRepositoryImpl) GetByUsername(ctx context.Context, username string) (*entity.User, error) {
 	var userModel model.UserModel
 
-	query := `SELECT * FROM users WHERE username = ? AND deleted_at IS NULL`
+	query := `SELECT * FROM user WHERE username = ? AND deleted_at IS NULL`
 	err := r.db.GetContext(ctx, &userModel, query, username)
 	if err != nil {
 		return nil, err
@@ -129,7 +129,7 @@ func (r *userRepositoryImpl) Update(ctx context.Context, user *entity.User) erro
 		UpdatedBy:    user.UpdatedBy,
 	}
 
-	query := `UPDATE users SET username = :username, email = :email, password_hash = :password_hash, 
+	query := `UPDATE user SET username = :username, email = :email, password_hash = :password_hash, 
 			  status = :status, updated_by = :updated_by, updated_at = NOW() WHERE id = :id AND deleted_at IS NULL`
 
 	_, err := r.db.NamedExecContext(ctx, query, userModel)
@@ -137,7 +137,7 @@ func (r *userRepositoryImpl) Update(ctx context.Context, user *entity.User) erro
 }
 
 func (r *userRepositoryImpl) Delete(ctx context.Context, id int) error {
-	query := `UPDATE users SET deleted_at = NOW() WHERE id = ? AND deleted_at IS NULL`
+	query := `UPDATE user SET deleted_at = NOW() WHERE id = ? AND deleted_at IS NULL`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err
 }
@@ -145,7 +145,7 @@ func (r *userRepositoryImpl) Delete(ctx context.Context, id int) error {
 func (r *userRepositoryImpl) GetAll(ctx context.Context, limit, offset int) ([]*entity.User, error) {
 	var userModels []model.UserModel
 
-	query := `SELECT * FROM users WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT ? OFFSET ?`
+	query := `SELECT * FROM user WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT ? OFFSET ?`
 	err := r.db.SelectContext(ctx, &userModels, query, limit, offset)
 	if err != nil {
 		return nil, err
@@ -174,7 +174,7 @@ func (r *userRepositoryImpl) GetAll(ctx context.Context, limit, offset int) ([]*
 
 func (r *userRepositoryImpl) GetCount(ctx context.Context) (int, error) {
 	var count int
-	query := `SELECT COUNT(*) FROM users WHERE deleted_at IS NULL`
+	query := `SELECT COUNT(*) FROM user WHERE deleted_at IS NULL`
 	err := r.db.GetContext(ctx, &count, query)
 	return count, err
 }
@@ -182,7 +182,7 @@ func (r *userRepositoryImpl) GetCount(ctx context.Context) (int, error) {
 func (r *userRepositoryImpl) GetByVerificationToken(ctx context.Context, token string) (*entity.User, error) {
 	var userModel model.UserModel
 
-	query := `SELECT * FROM users WHERE verification_token = ? AND deleted_at IS NULL`
+	query := `SELECT * FROM user WHERE verification_token = ? AND deleted_at IS NULL`
 	err := r.db.GetContext(ctx, &userModel, query, token)
 	if err != nil {
 		return nil, err
@@ -211,7 +211,7 @@ func (r *userRepositoryImpl) UpdateVerificationToken(ctx context.Context, user *
 		UpdatedBy:         user.UpdatedBy,
 	}
 
-	query := `UPDATE users SET verification_token = :verification_token, 
+	query := `UPDATE user SET verification_token = :verification_token, 
 			  updated_by = :updated_by, updated_at = NOW() 
 			  WHERE id = :id AND deleted_at IS NULL`
 
