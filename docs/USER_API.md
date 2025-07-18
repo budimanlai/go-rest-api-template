@@ -28,8 +28,6 @@ x-api-key: test-api-key
 **Response (201 Created):**
 ```json
 {
-  "success": true,
-  "message": "User created successfully",
   "data": {
     "id": 1,
     "username": "john_doe",
@@ -37,6 +35,10 @@ x-api-key: test-api-key
     "status": "active",
     "created_at": "2025-07-16T10:00:00Z",
     "updated_at": "2025-07-16T10:00:00Z"
+  },
+  "meta": {
+    "success": true,
+    "message": "User created successfully"
   }
 }
 ```
@@ -47,8 +49,6 @@ x-api-key: test-api-key
 **Response (200 OK):**
 ```json
 {
-  "success": true,
-  "message": "User retrieved successfully",
   "data": {
     "id": 1,
     "username": "john_doe",
@@ -56,6 +56,10 @@ x-api-key: test-api-key
     "status": "active",
     "created_at": "2025-07-16T10:00:00Z",
     "updated_at": "2025-07-16T10:00:00Z"
+  },
+  "meta": {
+    "success": true,
+    "message": "User retrieved successfully"
   }
 }
 ```
@@ -70,24 +74,24 @@ x-api-key: test-api-key
 **Response (200 OK):**
 ```json
 {
-  "success": true,
-  "message": "Users retrieved successfully",
-  "data": {
-    "users": [
-      {
-        "id": 1,
-        "username": "john_doe",
-        "email": "john@example.com",
-        "status": "active",
-        "created_at": "2025-07-16T10:00:00Z",
-        "updated_at": "2025-07-16T10:00:00Z"
-      }
-    ],
+  "data": [
+    {
+      "id": 1,
+      "username": "john_doe",
+      "email": "john@example.com",
+      "status": "active",
+      "created_at": "2025-07-16T10:00:00Z",
+      "updated_at": "2025-07-16T10:00:00Z"
+    }
+  ],
+  "meta": {
+    "success": true,
+    "message": "Users retrieved successfully",
     "pagination": {
-      "current_page": 1,
-      "total_pages": 1,
-      "total_count": 1,
-      "limit": 10
+      "page": 1,
+      "limit": 10,
+      "total": 1,
+      "total_pages": 1
     }
   }
 }
@@ -109,8 +113,6 @@ x-api-key: test-api-key
 **Response (200 OK):**
 ```json
 {
-  "success": true,
-  "message": "User updated successfully",
   "data": {
     "id": 1,
     "username": "john_updated",
@@ -118,6 +120,10 @@ x-api-key: test-api-key
     "status": "active",
     "created_at": "2025-07-16T10:00:00Z",
     "updated_at": "2025-07-16T10:01:00Z"
+  },
+  "meta": {
+    "success": true,
+    "message": "User updated successfully"
   }
 }
 ```
@@ -128,9 +134,11 @@ x-api-key: test-api-key
 **Response (200 OK):**
 ```json
 {
-  "success": true,
-  "message": "User deleted successfully",
-  "data": null
+  "data": null,
+  "meta": {
+    "success": true,
+    "message": "User deleted successfully"
+  }
 }
 ```
 
@@ -139,27 +147,46 @@ x-api-key: test-api-key
 ### Validation Error (400 Bad Request)
 ```json
 {
-  "success": false,
-  "message": "Validation failed",
-  "error": "username must be at least 3 characters"
+  "data": null,
+  "meta": {
+    "success": false,
+    "message": "Validation failed. Please check the following fields",
+    "errors": {
+      "total_errors": 2,
+      "validation_errors": [
+        {
+          "field": "username",
+          "message": "username must be at least 3 characters"
+        },
+        {
+          "field": "email",
+          "message": "email must be a valid email address"
+        }
+      ]
+    }
+  }
 }
 ```
 
 ### Not Found (404 Not Found)
 ```json
 {
-  "success": false,
-  "message": "User not found",
-  "error": "user not found"
+  "data": null,
+  "meta": {
+    "success": false,
+    "message": "User not found"
+  }
 }
 ```
 
 ### Server Error (500 Internal Server Error)
 ```json
 {
-  "success": false,
-  "message": "Failed to create user",
-  "error": "database connection failed"
+  "data": null,
+  "meta": {
+    "success": false,
+    "message": "Failed to create user"
+  }
 }
 ```
 

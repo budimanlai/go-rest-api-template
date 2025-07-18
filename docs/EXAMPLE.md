@@ -241,10 +241,10 @@ type UserHandler struct {
     validator   *validator.Validator
 }
 
-func NewUserHandler(userUsecase usecase.UserUsecase) *UserHandler {
+func NewUserHandler(userRepo repository.UserRepository) *UserHandler {
     return &UserHandler{
-        userUsecase: userUsecase,
-        validator:   validator.New(),
+        userRepo:  userRepo,
+        validator: validator.New(),
     }
 }
 

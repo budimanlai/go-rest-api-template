@@ -1,29 +1,48 @@
 # Constants Documentation
 
 ## Overview
-This package contains all constants used throughout the application to ensure consistency, maintainability, and avoid magic strings/numbers.
+This package contains essential constants used throughout the application to ensure consistency, maintainability, and avoid magic strings/numbers. The constants have been carefully curated to include only the most essential values to prevent over-engineering.
+
+## Design Philosophy
+- **Keep it Simple**: Only include constants that are truly needed and used multiple times
+- **Avoid Over-engineering**: SQL queries and HTTP status codes are kept inline for better debugging and maintenance
+- **Focus on Business Logic**: Constants should represent business values, not infrastructure details
 
 ## File Structure
 
 ```
 internal/constant/
-├── constant.go    # General application constants
-├── database.go    # Database-specific constants
-└── http.go        # HTTP-related constants
+└── constant.go    # Essential application constants only
+```
+
+## Current Constants
+
+### User Status Constants
+```go
+const (
+    UserStatusActive = "active"  // Standard active user status
+)
+```
+
+### Default Values
+```go
+const (
+    DefaultUpdatedBy = 0   // System user ID for automated updates
+    AuthKeyLength    = 32  // Length for authentication keys
+)
 ```
 
 ## Usage Examples
 
-### 1. Using Database Constants
+### 1. Using User Status Constants
 
 **Before (with magic strings):**
 ```go
 // ❌ Bad - magic strings
-query := `INSERT INTO user (username, auth_key, email, password_hash, status, created_by, created_at, updated_at) 
-          VALUES (:username, :auth_key, :email, :password_hash, :status, :created_by, NOW(), NOW())`
-
-authKey := common.GenerateRandomString(32)
-status := "active"
+user.Status = "active"
+if user.Status == "active" {
+    // do something
+}
 ```
 
 **After (with constants):**
@@ -31,23 +50,57 @@ status := "active"
 // ✅ Good - using constants
 import "go-rest-api-template/internal/constant"
 
-result, err := r.db.NamedExecContext(ctx, constant.QueryInsertUser, userModel)
-
-authKey := common.GenerateRandomString(constant.AuthKeyLength)
-status := constant.UserStatusActive
+user.Status = constant.UserStatusActive
+if user.Status == constant.UserStatusActive {
+    // do something
+}
 ```
 
-### 2. Using HTTP Constants
+### 2. Using Default Values
 
 **Before:**
 ```go
-// ❌ Bad - magic numbers and strings
-return response.ErrorWithI18n(c, 400, "invalid_request", nil)
-return response.ErrorWithI18n(c, 409, "username_exists", nil)
-return response.CreatedWithI18n(c, "user_created", userResponse, nil)
+// ❌ Bad - magic numbers
+authKey := common.GenerateRandomString(32)
+user.UpdatedBy = 0  // unclear what 0 means
 ```
 
 **After:**
+```go
+// ✅ Good - using constants
+import "go-rest-api-template/internal/constant"
+
+authKey := common.GenerateRandomString(constant.AuthKeyLength)
+user.UpdatedBy = constant.DefaultUpdatedBy  // clear that this is system user
+```
+
+## What We Don't Use Constants For
+
+### SQL Queries
+SQL queries are kept inline in repository implementations for better:
+- **Debugging**: Easier to see the actual query when debugging
+- **Maintenance**: Changes to queries don't require updating multiple files
+- **IDE Support**: Better syntax highlighting and auto-completion
+
+**Example:**
+```go
+// ✅ Good - inline SQL for clarity
+query := `INSERT INTO user (username, email, status, created_at, updated_at) 
+          VALUES (?, ?, ?, NOW(), NOW())`
+```
+
+### HTTP Status Codes
+HTTP status codes are used directly from the Fiber framework:
+- **Standard**: Uses well-known fiber.StatusXXX constants
+- **Clear**: More explicit than custom constants
+- **Maintainable**: No additional abstraction layer
+
+**Example:**
+```go
+// ✅ Good - using fiber constants directly
+return response.ErrorWithI18n(c, fiber.StatusBadRequest, "invalid_request", nil)
+return response.ErrorWithI18n(c, fiber.StatusConflict, "username_exists", nil)
+```
 ```go
 // ✅ Good - using constants
 return response.ErrorWithI18n(c, constant.StatusBadRequest, constant.ErrInvalidRequest, nil)

@@ -55,7 +55,7 @@ test/                      # Test files
 ## 🚀 Features
 
 - ✅ **Clean Architecture** with proper layering
-- ✅ **Go Fiber** v2 web framework
+- ✅ **Go Fiber** v2 web framework  
 - ✅ **MySQL** database with SQLX
 - ✅ **Database Migration** system with versioning
 - ✅ **API Key Authentication** middleware
@@ -63,11 +63,14 @@ test/                      # Test files
 - ✅ **Graceful Shutdown**
 - ✅ **Configuration Management**
 - ✅ **Input Validation** with go-playground/validator v10
-- ✅ **Standardized Responses**
+- ✅ **Standardized Response Format** with data/meta structure
+- ✅ **Structured Validation Errors** with field-level details
 - ✅ **Database Connection Pooling**
-- ✅ **Error Handling**
+- ✅ **Repository Pattern** with interface-based design
+- ✅ **Error Handling** with proper HTTP status codes
 - 🌍 **Multilingual Support (i18n)** - English & Indonesian
 - ✅ **Language Detection** via query params & headers
+- ✅ **Essential Constants** management (minimal approach)
 
 ## 🛠️ Tech Stack
 
@@ -304,20 +307,92 @@ go test ./internal/domain/usecase/...
 ## 📝 API Documentation
 
 ### Standard Response Format
+
+All API responses follow a consistent structure with `data` and `meta` fields:
+
+**Success Response:**
 ```json
 {
-    "success": true,
-    "message": "Operation successful",
-    "data": {...}
+    "data": {
+        "id": 1,
+        "username": "john_doe",
+        "email": "john@example.com",
+        "status": "active"
+    },
+    "meta": {
+        "success": true,
+        "message": "User retrieved successfully"
+    }
 }
 ```
 
-### Error Response Format
+**Success Response (Array):**
 ```json
 {
-    "success": false,
-    "message": "Error message",
-    "error": "Detailed error information"
+    "data": [
+        {
+            "id": 1,
+            "username": "john_doe",
+            "email": "john@example.com",
+            "status": "active"
+        }
+    ],
+    "meta": {
+        "success": true,
+        "message": "Users retrieved successfully"
+    }
+}
+```
+
+**Error Response:**
+```json
+{
+    "data": null,
+    "meta": {
+        "success": false,
+        "message": "User not found"
+    }
+}
+```
+
+**Validation Error Response:**
+```json
+{
+    "data": null,
+    "meta": {
+        "success": false,
+        "message": "Validation failed. Please check the following fields",
+        "errors": {
+            "total_errors": 2,
+            "validation_errors": [
+                {
+                    "field": "email",
+                    "message": "email must be a valid email address"
+                },
+                {
+                    "field": "password",
+                    "message": "password must be at least 8 characters"
+                }
+            ]
+        }
+    }
+}
+```
+
+**Paginated Response:**
+```json
+{
+    "data": [...],
+    "meta": {
+        "success": true,
+        "message": "Users retrieved successfully",
+        "pagination": {
+            "page": 1,
+            "limit": 10,
+            "total": 100,
+            "total_pages": 10
+        }
+    }
 }
 ```
 
@@ -391,6 +466,8 @@ export DATABASE_NAME=myapp
 - [📦 Container Guide](docs/CONTAINER_GUIDE.md) - Dependency injection
 - [📋 Example Implementation](docs/EXAMPLE.md) - Complete CRUD example
 - [🔗 User API Documentation](docs/USER_API.md) - API endpoint reference
+- [🏗️ Response Format Guide](docs/RESPONSE_FORMAT.md) - Standardized API responses
+- [🎯 Constants Usage](docs/CONSTANTS_USAGE.md) - Essential constants management
 
 ### **External Resources**
 - [Clean Architecture by Robert Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
