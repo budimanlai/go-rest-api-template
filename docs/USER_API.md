@@ -13,37 +13,9 @@ x-api-key: test-api-key
 
 ## Endpoints
 
-### 1. Create User
-**POST** `/api/v1/users`
+**Note:** User creation is handled through the authentication endpoint `/api/v1/public/auth/register`, not through the user endpoints.
 
-**Request Body:**
-```json
-{
-  "username": "john_doe",
-  "email": "john@example.com",
-  "password": "password123"
-}
-```
-
-**Response (201 Created):**
-```json
-{
-  "data": {
-    "id": 1,
-    "username": "john_doe",
-    "email": "john@example.com",
-    "status": "active",
-    "created_at": "2025-07-16T10:00:00Z",
-    "updated_at": "2025-07-16T10:00:00Z"
-  },
-  "meta": {
-    "success": true,
-    "message": "User created successfully"
-  }
-}
-```
-
-### 2. Get User by ID
+### 1. Get User by ID
 **GET** `/api/v1/users/:id`
 
 **Response (200 OK):**
@@ -64,7 +36,7 @@ x-api-key: test-api-key
 }
 ```
 
-### 3. Get All Users (with Pagination)
+### 2. Get All Users (with Pagination)
 **GET** `/api/v1/users?page=1&limit=10`
 
 **Query Parameters:**
@@ -97,7 +69,7 @@ x-api-key: test-api-key
 }
 ```
 
-### 4. Update User
+### 3. Update User
 **PUT** `/api/v1/users/:id`
 
 **Request Body (all fields optional):**
@@ -128,7 +100,7 @@ x-api-key: test-api-key
 }
 ```
 
-### 5. Delete User (Soft Delete)
+### 4. Delete User (Soft Delete)
 **DELETE** `/api/v1/users/:id`
 
 **Response (200 OK):**
@@ -200,17 +172,7 @@ x-api-key: test-api-key
 
 ## Testing with cURL
 
-### Create User
-```bash
-curl -X POST http://localhost:8080/api/v1/users \
-  -H "Content-Type: application/json" \
-  -H "x-api-key: test-api-key" \
-  -d '{
-    "username": "testuser",
-    "email": "test@example.com",
-    "password": "password123"
-  }'
-```
+**Note:** To create a user, use the registration endpoint: `POST /api/v1/public/auth/register`
 
 ### Get All Users
 ```bash

@@ -20,7 +20,6 @@ func SetupUserRoutes(app *fiber.App, userHandler *handler.UserHandler, apiKeySer
 	userGroup := v1.Group("/users", privateMiddleware)
 
 	// User CRUD routes
-	userGroup.Post("/", userHandler.CreateUser)
 	userGroup.Get("/", userHandler.GetAllUsers)
 	userGroup.Get("/:id", userHandler.GetUserByID)
 	userGroup.Put("/:id", userHandler.UpdateUser)

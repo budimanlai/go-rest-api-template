@@ -47,16 +47,6 @@ func (h *UserHandler) GetUserByID(c *fiber.Ctx) error {
 	return response.SuccessWithI18n(c, "user_retrieved", userResponse, nil)
 }
 
-// CreateUser handles POST /users
-func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
-	// Temporary simple implementation
-	return response.SuccessWithI18n(c, "user_created", map[string]interface{}{
-		"id":       1,
-		"username": "new_user",
-		"status":   constant.UserStatusActive,
-	}, nil)
-}
-
 // UpdateUser handles PUT /users/:id
 func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))

@@ -44,8 +44,7 @@ func setupV1Routes(api fiber.Router, config *AdvancedRouteConfig) {
 func setupUserV1Routes(v1 fiber.Router, userHandler *handler.UserHandler) {
 	users := v1.Group("/users")
 
-	// CRUD operations
-	users.Post("/", userHandler.CreateUser)
+	// CRUD operations (Note: User creation is handled via /auth/register)
 	users.Get("/", userHandler.GetAllUsers)
 	users.Get("/:id", userHandler.GetUserByID)
 	users.Put("/:id", userHandler.UpdateUser)

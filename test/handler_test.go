@@ -1,13 +1,10 @@
 package handler_test
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"go-rest-api-template/internal/domain/entity"
 	"go-rest-api-template/internal/handler"
-	"go-rest-api-template/internal/model"
 	"go-rest-api-template/pkg/i18n"
 	"go-rest-api-template/pkg/response"
 	"net/http"
@@ -144,37 +141,6 @@ func createSimpleResponseHelper() *response.I18nResponseHelper {
 
 	manager, _ := i18n.NewManager(config)
 	return response.NewI18nResponseHelper(manager)
-}
-
-func TestUserHandler_CreateUser(t *testing.T) {
-	// Setup global helpers first
-	setupTestGlobalHelpers()
-
-	// Setup mock repository
-	mockRepo := NewMockUserRepository()
-	userHandler := handler.NewUserHandler(mockRepo)
-
-	app := fiber.New()
-	app.Post("/users", userHandler.CreateUser)
-
-	// Test data
-	createReq := model.UserCreateRequest{
-		Username: "testuser",
-		Email:    "test@example.com",
-		Password: "password123",
-	}
-
-	// Prepare request
-	reqBody, _ := json.Marshal(createReq)
-	req := httptest.NewRequest("POST", "/users", bytes.NewBuffer(reqBody))
-	req.Header.Set("Content-Type", "application/json")
-
-	// Execute
-	resp, err := app.Test(req)
-
-	// Assert
-	assert.NoError(t, err)
-	assert.Equal(t, http.StatusOK, resp.StatusCode) // Handler returns 200, not 201
 }
 
 func TestUserHandler_GetUserByID(t *testing.T) {
