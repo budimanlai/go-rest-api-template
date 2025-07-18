@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go-rest-api-template/pkg/i18n"
 	"go-rest-api-template/pkg/logger"
+	"go-rest-api-template/pkg/validator"
 	"runtime"
 	"strings"
 
@@ -336,5 +337,40 @@ func InternalServerError(c *fiber.Ctx, message string, err string) error {
 		Success: false,
 		Message: message,
 		Error:   err,
+	})
+}
+
+// ValidationErrorResponse sends structured validation error response with new format
+func ValidationErrorResponse(c *fiber.Ctx, message string, err error) error {
+	// Get validation errors from the error
+	validationErrors := validator.GetValidationErrors(err)
+
+	// Simplify validation errors to only include field and message
+	simplifiedErrors := make([]map[string]string, len(validationErrors))
+	for i, ve := range validationErrors {
+		simplifiedErrors[i] = map[string]string{
+			"field":   ve.Field,
+			"message": ve.Message,
+		}
+	}
+
+	// Auto-log validation errors
+	templateData := map[string]interface{}{
+		"validation_errors": simplifiedErrors,
+		"total_errors":      len(simplifiedErrors),
+	}
+
+	logErrorWithCaller(fiber.StatusBadRequest, "validation_failed", templateData)
+
+	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		"data": nil,
+		"meta": fiber.Map{
+			"success": false,
+			"message": message,
+			"errors": fiber.Map{
+				"total_errors":      len(simplifiedErrors),
+				"validation_errors": simplifiedErrors,
+			},
+		},
 	})
 }

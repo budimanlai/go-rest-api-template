@@ -116,17 +116,7 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 		Password: req.Password,
 	}
 	if err := loginReq.Validate(); err != nil {
-		validationErrors := validator.GetValidationErrors(err)
-
-		// Return structured validation error response
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
-			"message": "Validation failed. Please check the following fields",
-			"data": fiber.Map{
-				"validation_errors": validationErrors,
-				"total_errors":      len(validationErrors),
-			},
-		})
+		return response.ValidationErrorResponse(c, "Validation failed. Please check the following fields", err)
 	}
 
 	// Get API key from context (should be set by middleware)
@@ -192,17 +182,7 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 
 	// Validate request
 	if err := validator.ValidateStruct(&req); err != nil {
-		validationErrors := validator.GetValidationErrors(err)
-
-		// Return structured validation error response
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
-			"message": "Validation failed. Please check the following fields",
-			"data": fiber.Map{
-				"validation_errors": validationErrors,
-				"total_errors":      len(validationErrors),
-			},
-		})
+		return response.ValidationErrorResponse(c, "Validation failed. Please check the following fields", err)
 	}
 
 	// Get API key info from context for user creation
