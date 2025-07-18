@@ -22,7 +22,7 @@ func NewUserHandler() *UserHandler {
 func (h *UserHandler) GetUserByID(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return response.ErrorWithI18n(c, constant.StatusBadRequest, "invalid_user_id", nil)
+		return response.ErrorWithI18n(c, fiber.StatusBadRequest, "invalid_user_id", nil)
 	}
 
 	// Temporary response
@@ -50,7 +50,7 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return response.ErrorWithI18n(c, constant.StatusBadRequest, "invalid_user_id", nil)
+		return response.ErrorWithI18n(c, fiber.StatusBadRequest, "invalid_user_id", nil)
 	}
 
 	return response.SuccessWithI18n(c, "user_updated", map[string]interface{}{
@@ -64,7 +64,7 @@ func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return response.ErrorWithI18n(c, constant.StatusBadRequest, "invalid_user_id", nil)
+		return response.ErrorWithI18n(c, fiber.StatusBadRequest, "invalid_user_id", nil)
 	}
 
 	return response.SuccessWithI18n(c, "user_deleted", map[string]interface{}{
@@ -111,7 +111,7 @@ func (h *UserHandler) ResetPassword(c *fiber.Ctx) error {
 func (h *UserHandler) ChangePassword(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return response.ErrorWithI18n(c, constant.StatusBadRequest, "invalid_user_id", nil)
+		return response.ErrorWithI18n(c, fiber.StatusBadRequest, "invalid_user_id", nil)
 	}
 
 	return response.SuccessWithI18n(c, "password_changed", map[string]interface{}{

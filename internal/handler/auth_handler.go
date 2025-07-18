@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"go-rest-api-template/internal/constant"
 	"go-rest-api-template/internal/domain/entity"
 	"go-rest-api-template/internal/domain/usecase"
 	"go-rest-api-template/internal/model"
@@ -115,8 +116,16 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 		Password: req.Password,
 	}
 	if err := loginReq.Validate(); err != nil {
-		return response.ErrorWithI18n(c, fiber.StatusBadRequest, "validation_failed", map[string]interface{}{
-			"error": err.Error(),
+		validationErrors := validator.GetValidationErrors(err)
+
+		// Return structured validation error response
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "Validation failed. Please check the following fields",
+			"data": fiber.Map{
+				"validation_errors": validationErrors,
+				"total_errors":      len(validationErrors),
+			},
 		})
 	}
 
@@ -183,8 +192,16 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 
 	// Validate request
 	if err := validator.ValidateStruct(&req); err != nil {
-		return response.ErrorWithI18n(c, fiber.StatusBadRequest, "validation_failed", map[string]interface{}{
-			"errors": err,
+		validationErrors := validator.GetValidationErrors(err)
+
+		// Return structured validation error response
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "Validation failed. Please check the following fields",
+			"data": fiber.Map{
+				"validation_errors": validationErrors,
+				"total_errors":      len(validationErrors),
+			},
 		})
 	}
 
@@ -203,7 +220,7 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	user := &entity.User{
 		Username: req.Username,
 		Email:    req.Email,
-		Status:   "active",
+		Status:   constant.UserStatusActive,
 	}
 
 	// Set password (will be hashed)
@@ -218,7 +235,9 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 		return response.ErrorWithI18n(c, fiber.StatusInternalServerError, "internal_server", map[string]interface{}{
 			"error": err.Error(),
 		})
-	} // Create API key entity for token generation
+	}
+
+	// Create API key entity for token generation
 	apiKey := &entity.ApiKey{
 		ID:   apiKeyID,
 		Name: apiKeyName,
