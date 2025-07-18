@@ -1,26 +1,82 @@
-{
-  "error.reset_token_invalid": "Token de restablecimiento inválido o expirado",
-  "error.reset_token_expired": "Token de restablecimiento ha expirado",
-  "error.failed_forgot_password": "Error al procesar olvido de contraseña",
-  "error.reset_password_failed": "Error al restablecer contraseña",
-  "error.registration_failed": "Registro fallido",
-  "error.login_failed": "Login fallido",
-  "error.session_expired": "Sesión ha expirado",
-
-  "success.reset_email_sent": "Email de restablecimiento enviado exitosamente",
-  "success.password_reset": "Contraseña restablecida exitosamente",
-  "success.reset_password_sent": "Instrucciones de restablecimiento enviadas a su email",
-  "success.login": "Login exitoso",
-  "success.logout": "Logout exitoso", 
-  "success.registration": "Registro exitoso",
-  "success.token_generated": "Token de acceso generado exitosamente",
-  "success.token_refreshed": "Token actualizado exitosamente",
-  
-  "auth.login_success": "¡Bienvenido de vuelta! Has iniciado sesión exitosamente",
-  "auth.registration_success": "¡Cuenta creada exitosamente! Por favor verifica tu email",
-  "auth.logout_success": "Has cerrado sesión exitosamente",
-  "auth.token_about_to_expire": "Tu sesión expirará en {{.Minutes}} minutos",
-  "auth.account_created": "Tu cuenta ha sido creada exitosamente",
-  "auth.password_updated": "Tu contraseña ha sido actualizada exitosamente",
-  "auth.profile_completed": "La configuración de tu perfil está completa"
-}
+[
+  {
+    "id": "error.auth_required",
+    "translation": "Autenticación requerida"
+  },
+  {
+    "id": "error.token_missing",
+    "translation": "Token de autenticación faltante"
+  },
+  {
+    "id": "error.token_invalid",
+    "translation": "Token de autenticación inválido"
+  },
+  {
+    "id": "error.token_expired",
+    "translation": "Token de autenticación ha expirado"
+  },
+  {
+    "id": "error.access_denied",
+    "translation": "Acceso denegado"
+  },
+  {
+    "id": "error.insufficient_permissions",
+    "translation": "Permisos insuficientes"
+  },
+  {
+    "id": "error.invalid_refresh_token",
+    "translation": "Token de actualización inválido"
+  },
+  {
+    "id": "error.refresh_token_expired",
+    "translation": "Token de actualización ha expirado"
+  },
+  {
+    "id": "error.login_failed",
+    "translation": "Error en el inicio de sesión"
+  },
+  {
+    "id": "error.logout_failed",
+    "translation": "Error al cerrar sesión"
+  },
+  {
+    "id": "error.registration_failed",
+    "translation": "Error en el registro"
+  },
+  {
+    "id": "error.user_already_exists",
+    "translation": "El usuario ya existe"
+  },
+  {
+    "id": "error.invalid_role",
+    "translation": "Rol inválido"
+  },
+  {
+    "id": "error.password_reset_failed",
+    "translation": "Error al restablecer contraseña"
+  },
+  {
+    "id": "success.login_success",
+    "translation": "Inicio de sesión exitoso"
+  },
+  {
+    "id": "success.logout_success",
+    "translation": "Cierre de sesión exitoso"
+  },
+  {
+    "id": "success.registration_success",
+    "translation": "Registro exitoso"
+  },
+  {
+    "id": "success.token_refreshed",
+    "translation": "Token actualizado exitosamente"
+  },
+  {
+    "id": "success.access_granted",
+    "translation": "Acceso concedido"
+  },
+  {
+    "id": "success.password_reset_success",
+    "translation": "Contraseña restablecida exitosamente"
+  }
+]

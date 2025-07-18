@@ -1,1 +1,82 @@
-[]
+[
+  {
+    "id": "error.auth_required",
+    "translation": "Otentikasi diperlukan"
+  },
+  {
+    "id": "error.token_missing",
+    "translation": "Token otentikasi tidak ada"
+  },
+  {
+    "id": "error.token_invalid",
+    "translation": "Token otentikasi tidak valid"
+  },
+  {
+    "id": "error.token_expired",
+    "translation": "Token otentikasi sudah kedaluwarsa"
+  },
+  {
+    "id": "error.access_denied",
+    "translation": "Akses ditolak"
+  },
+  {
+    "id": "error.insufficient_permissions",
+    "translation": "Izin tidak mencukupi"
+  },
+  {
+    "id": "error.invalid_refresh_token",
+    "translation": "Token refresh tidak valid"
+  },
+  {
+    "id": "error.refresh_token_expired",
+    "translation": "Token refresh sudah kedaluwarsa"
+  },
+  {
+    "id": "error.login_failed",
+    "translation": "Login gagal"
+  },
+  {
+    "id": "error.logout_failed",
+    "translation": "Logout gagal"
+  },
+  {
+    "id": "error.registration_failed",
+    "translation": "Registrasi gagal"
+  },
+  {
+    "id": "error.user_already_exists",
+    "translation": "Pengguna sudah ada"
+  },
+  {
+    "id": "error.invalid_role",
+    "translation": "Peran tidak valid"
+  },
+  {
+    "id": "error.password_reset_failed",
+    "translation": "Reset kata sandi gagal"
+  },
+  {
+    "id": "success.login_success",
+    "translation": "Login berhasil"
+  },
+  {
+    "id": "success.logout_success",
+    "translation": "Logout berhasil"
+  },
+  {
+    "id": "success.registration_success",
+    "translation": "Registrasi berhasil"
+  },
+  {
+    "id": "success.token_refreshed",
+    "translation": "Token berhasil diperbarui"
+  },
+  {
+    "id": "success.access_granted",
+    "translation": "Akses diberikan"
+  },
+  {
+    "id": "success.password_reset_success",
+    "translation": "Kata sandi berhasil direset"
+  }
+]

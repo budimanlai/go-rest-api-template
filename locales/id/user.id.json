@@ -1,1 +1,142 @@
-[]
+[
+  {
+    "id": "error.user_not_found",
+    "translation": "Pengguna tidak ditemukan"
+  },
+  {
+    "id": "error.invalid_user_id",
+    "translation": "ID pengguna tidak valid"
+  },
+  {
+    "id": "error.failed_to_get_users",
+    "translation": "Gagal mengambil data pengguna"
+  },
+  {
+    "id": "error.username_required",
+    "translation": "Nama pengguna wajib diisi"
+  },
+  {
+    "id": "error.username_min_length",
+    "translation": "Nama pengguna harus minimal {{.MinLength}} karakter"
+  },
+  {
+    "id": "error.email_required",
+    "translation": "Email wajib diisi"
+  },
+  {
+    "id": "error.email_invalid",
+    "translation": "Format email tidak valid"
+  },
+  {
+    "id": "error.password_required",
+    "translation": "Kata sandi wajib diisi"
+  },
+  {
+    "id": "error.password_min_length",
+    "translation": "Kata sandi harus minimal {{.MinLength}} karakter"
+  },
+  {
+    "id": "error.username_exists",
+    "translation": "Nama pengguna sudah ada"
+  },
+  {
+    "id": "error.email_exists",
+    "translation": "Email sudah terdaftar"
+  },
+  {
+    "id": "error.invalid_credentials",
+    "translation": "Nama pengguna atau kata sandi salah"
+  },
+  {
+    "id": "error.invalid_current_password",
+    "translation": "Kata sandi saat ini tidak valid"
+  },
+  {
+    "id": "error.password_hashing_failed",
+    "translation": "Gagal mengenkripsi kata sandi"
+  },
+  {
+    "id": "error.failed_update_user",
+    "translation": "Gagal memperbarui pengguna"
+  },
+  {
+    "id": "error.failed_retrieve_updated_user",
+    "translation": "Gagal mengambil data pengguna yang diperbarui"
+  },
+  {
+    "id": "error.failed_delete_user",
+    "translation": "Gagal menghapus pengguna"
+  },
+  {
+    "id": "error.account_locked",
+    "translation": "Akun terkunci karena beberapa kali percobaan gagal"
+  },
+  {
+    "id": "error.account_inactive",
+    "translation": "Akun tidak aktif"
+  },
+  {
+    "id": "error.email_not_verified",
+    "translation": "Alamat email belum diverifikasi"
+  },
+  {
+    "id": "error.password_complexity",
+    "translation": "Kata sandi tidak memenuhi persyaratan kompleksitas"
+  },
+  {
+    "id": "error.password_expired",
+    "translation": "Kata sandi sudah kedaluwarsa"
+  },
+  {
+    "id": "success.user_retrieved",
+    "translation": "Pengguna berhasil diambil"
+  },
+  {
+    "id": "success.user_updated",
+    "translation": "Pengguna berhasil diperbarui"
+  },
+  {
+    "id": "success.user_deleted",
+    "translation": "Pengguna berhasil dihapus"
+  },
+  {
+    "id": "success.users_retrieved",
+    "translation": "Data pengguna berhasil diambil"
+  },
+  {
+    "id": "success.password_reset_email_sent",
+    "translation": "Email reset kata sandi berhasil dikirim"
+  },
+  {
+    "id": "success.password_reset_success",
+    "translation": "Kata sandi berhasil direset"
+  },
+  {
+    "id": "success.password_changed",
+    "translation": "Kata sandi berhasil diubah"
+  },
+  {
+    "id": "validation.user.username",
+    "translation": "Nama Pengguna"
+  },
+  {
+    "id": "validation.user.email",
+    "translation": "Email"
+  },
+  {
+    "id": "validation.user.password",
+    "translation": "Kata Sandi"
+  },
+  {
+    "id": "validation.user.current_password",
+    "translation": "Kata Sandi Saat Ini"
+  },
+  {
+    "id": "validation.user.new_password",
+    "translation": "Kata Sandi Baru"
+  },
+  {
+    "id": "validation.user.confirm_password",
+    "translation": "Konfirmasi Kata Sandi"
+  }
+]

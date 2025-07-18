@@ -1,36 +1,142 @@
-{
-  "error.user_not_found": "Usuario no encontrado",
-  "error.username_required": "El nombre de usuario es requerido",
-  "error.username_min_length": "El nombre de usuario debe tener al menos {{.MinLength}} caracteres",
-  "error.email_required": "El email es requerido", 
-  "error.email_invalid": "Formato de email inválido",
-  "error.password_required": "La contraseña es requerida",
-  "error.password_min_length": "La contraseña debe tener al menos {{.MinLength}} caracteres",
-  "error.username_exists": "El nombre de usuario ya existe",
-  "error.email_exists": "El email ya existe",
-  "error.invalid_credentials": "Nombre de usuario o contraseña inválidos",
-  "error.invalid_current_password": "Contraseña actual inválida",
-  "error.invalid_user_id": "ID de usuario inválido",
-  "error.password_hashing_failed": "Error al encriptar contraseña",
-  "error.failed_retrieve_users": "Error al obtener usuarios",
-  "error.failed_get_user_count": "Error al obtener el conteo de usuarios", 
-  "error.failed_update_user": "Error al actualizar usuario",
-  "error.failed_retrieve_updated_user": "Error al obtener usuario actualizado",
-  "error.failed_delete_user": "Error al eliminar usuario",
-  "error.account_locked": "Cuenta bloqueada debido a múltiples intentos fallidos",
-  "error.account_inactive": "Cuenta inactiva",
-  "error.email_not_verified": "Dirección de email no verificada",
-  "error.password_complexity": "La contraseña no cumple los requisitos de complejidad",
-  "error.password_expired": "La contraseña ha expirado",
-
-  "success.user_created": "Usuario creado exitosamente",
-  "success.user_updated": "Usuario actualizado exitosamente", 
-  "success.user_deleted": "Usuario eliminado exitosamente",
-  "success.password_changed": "Contraseña cambiada exitosamente",
-  "success.users_retrieved": "Usuarios obtenidos exitosamente",
-  "success.user_retrieved": "Usuario obtenido exitosamente",
-  "success.profile_updated": "Perfil actualizado exitosamente",
-  "success.email_verified": "Email verificado exitosamente",
-  "success.account_activated": "Cuenta activada exitosamente",
-  "success.password_policy_updated": "Política de contraseñas actualizada exitosamente"
-}
+[
+  {
+    "id": "error.user_not_found",
+    "translation": "Usuario no encontrado"
+  },
+  {
+    "id": "error.invalid_user_id",
+    "translation": "ID de usuario inválido"
+  },
+  {
+    "id": "error.failed_to_get_users",
+    "translation": "Error al obtener usuarios"
+  },
+  {
+    "id": "error.username_required",
+    "translation": "El nombre de usuario es requerido"
+  },
+  {
+    "id": "error.username_min_length",
+    "translation": "El nombre de usuario debe tener al menos {{.MinLength}} caracteres"
+  },
+  {
+    "id": "error.email_required",
+    "translation": "El email es requerido"
+  },
+  {
+    "id": "error.email_invalid",
+    "translation": "Formato de email inválido"
+  },
+  {
+    "id": "error.password_required",
+    "translation": "La contraseña es requerida"
+  },
+  {
+    "id": "error.password_min_length",
+    "translation": "La contraseña debe tener al menos {{.MinLength}} caracteres"
+  },
+  {
+    "id": "error.username_exists",
+    "translation": "El nombre de usuario ya existe"
+  },
+  {
+    "id": "error.email_exists",
+    "translation": "El email ya existe"
+  },
+  {
+    "id": "error.invalid_credentials",
+    "translation": "Nombre de usuario o contraseña inválidos"
+  },
+  {
+    "id": "error.invalid_current_password",
+    "translation": "La contraseña actual es inválida"
+  },
+  {
+    "id": "error.password_hashing_failed",
+    "translation": "Error al cifrar la contraseña"
+  },
+  {
+    "id": "error.failed_update_user",
+    "translation": "Error al actualizar usuario"
+  },
+  {
+    "id": "error.failed_retrieve_updated_user",
+    "translation": "Error al obtener usuario actualizado"
+  },
+  {
+    "id": "error.failed_delete_user",
+    "translation": "Error al eliminar usuario"
+  },
+  {
+    "id": "error.account_locked",
+    "translation": "Cuenta bloqueada debido a múltiples intentos fallidos"
+  },
+  {
+    "id": "error.account_inactive",
+    "translation": "La cuenta está inactiva"
+  },
+  {
+    "id": "error.email_not_verified",
+    "translation": "La dirección de email no está verificada"
+  },
+  {
+    "id": "error.password_complexity",
+    "translation": "La contraseña no cumple con los requisitos de complejidad"
+  },
+  {
+    "id": "error.password_expired",
+    "translation": "La contraseña ha expirado"
+  },
+  {
+    "id": "success.user_retrieved",
+    "translation": "Usuario obtenido exitosamente"
+  },
+  {
+    "id": "success.user_updated",
+    "translation": "Usuario actualizado exitosamente"
+  },
+  {
+    "id": "success.user_deleted",
+    "translation": "Usuario eliminado exitosamente"
+  },
+  {
+    "id": "success.users_retrieved",
+    "translation": "Usuarios obtenidos exitosamente"
+  },
+  {
+    "id": "success.password_reset_email_sent",
+    "translation": "Email de restablecimiento de contraseña enviado exitosamente"
+  },
+  {
+    "id": "success.password_reset_success",
+    "translation": "Contraseña restablecida exitosamente"
+  },
+  {
+    "id": "success.password_changed",
+    "translation": "Contraseña cambiada exitosamente"
+  },
+  {
+    "id": "validation.user.username",
+    "translation": "Nombre de Usuario"
+  },
+  {
+    "id": "validation.user.email",
+    "translation": "Email"
+  },
+  {
+    "id": "validation.user.password",
+    "translation": "Contraseña"
+  },
+  {
+    "id": "validation.user.current_password",
+    "translation": "Contraseña Actual"
+  },
+  {
+    "id": "validation.user.new_password",
+    "translation": "Nueva Contraseña"
+  },
+  {
+    "id": "validation.user.confirm_password",
+    "translation": "Confirmar Contraseña"
+  }
+]

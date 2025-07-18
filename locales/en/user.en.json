@@ -1,1 +1,142 @@
-[]
+[
+  {
+    "id": "error.user_not_found",
+    "translation": "User not found"
+  },
+  {
+    "id": "error.invalid_user_id",
+    "translation": "Invalid user ID"
+  },
+  {
+    "id": "error.failed_to_get_users",
+    "translation": "Failed to retrieve users"
+  },
+  {
+    "id": "error.username_required",
+    "translation": "Username is required"
+  },
+  {
+    "id": "error.username_min_length",
+    "translation": "Username must be at least {{.MinLength}} characters"
+  },
+  {
+    "id": "error.email_required",
+    "translation": "Email is required"
+  },
+  {
+    "id": "error.email_invalid",
+    "translation": "Invalid email format"
+  },
+  {
+    "id": "error.password_required",
+    "translation": "Password is required"
+  },
+  {
+    "id": "error.password_min_length",
+    "translation": "Password must be at least {{.MinLength}} characters"
+  },
+  {
+    "id": "error.username_exists",
+    "translation": "Username already exists"
+  },
+  {
+    "id": "error.email_exists",
+    "translation": "Email already exists"
+  },
+  {
+    "id": "error.invalid_credentials",
+    "translation": "Invalid username or password"
+  },
+  {
+    "id": "error.invalid_current_password",
+    "translation": "Current password is invalid"
+  },
+  {
+    "id": "error.password_hashing_failed",
+    "translation": "Password hashing failed"
+  },
+  {
+    "id": "error.failed_update_user",
+    "translation": "Failed to update user"
+  },
+  {
+    "id": "error.failed_retrieve_updated_user",
+    "translation": "Failed to retrieve updated user"
+  },
+  {
+    "id": "error.failed_delete_user",
+    "translation": "Failed to delete user"
+  },
+  {
+    "id": "error.account_locked",
+    "translation": "Account is locked due to multiple failed attempts"
+  },
+  {
+    "id": "error.account_inactive",
+    "translation": "Account is inactive"
+  },
+  {
+    "id": "error.email_not_verified",
+    "translation": "Email address is not verified"
+  },
+  {
+    "id": "error.password_complexity",
+    "translation": "Password does not meet complexity requirements"
+  },
+  {
+    "id": "error.password_expired",
+    "translation": "Password has expired"
+  },
+  {
+    "id": "success.user_retrieved",
+    "translation": "User retrieved successfully"
+  },
+  {
+    "id": "success.user_updated",
+    "translation": "User updated successfully"
+  },
+  {
+    "id": "success.user_deleted",
+    "translation": "User deleted successfully"
+  },
+  {
+    "id": "success.users_retrieved",
+    "translation": "Users retrieved successfully"
+  },
+  {
+    "id": "success.password_reset_email_sent",
+    "translation": "Password reset email sent successfully"
+  },
+  {
+    "id": "success.password_reset_success",
+    "translation": "Password reset successfully"
+  },
+  {
+    "id": "success.password_changed",
+    "translation": "Password changed successfully"
+  },
+  {
+    "id": "validation.user.username",
+    "translation": "Username"
+  },
+  {
+    "id": "validation.user.email",
+    "translation": "Email"
+  },
+  {
+    "id": "validation.user.password",
+    "translation": "Password"
+  },
+  {
+    "id": "validation.user.current_password",
+    "translation": "Current Password"
+  },
+  {
+    "id": "validation.user.new_password",
+    "translation": "New Password"
+  },
+  {
+    "id": "validation.user.confirm_password",
+    "translation": "Confirm Password"
+  }
+]

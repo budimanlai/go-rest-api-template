@@ -1,1 +1,82 @@
-[]
+[
+  {
+    "id": "error.auth_required",
+    "translation": "Authentication required"
+  },
+  {
+    "id": "error.token_missing",
+    "translation": "Authentication token is missing"
+  },
+  {
+    "id": "error.token_invalid",
+    "translation": "Invalid authentication token"
+  },
+  {
+    "id": "error.token_expired",
+    "translation": "Authentication token has expired"
+  },
+  {
+    "id": "error.access_denied",
+    "translation": "Access denied"
+  },
+  {
+    "id": "error.insufficient_permissions",
+    "translation": "Insufficient permissions"
+  },
+  {
+    "id": "error.invalid_refresh_token",
+    "translation": "Invalid refresh token"
+  },
+  {
+    "id": "error.refresh_token_expired",
+    "translation": "Refresh token has expired"
+  },
+  {
+    "id": "error.login_failed",
+    "translation": "Login failed"
+  },
+  {
+    "id": "error.logout_failed",
+    "translation": "Logout failed"
+  },
+  {
+    "id": "error.registration_failed",
+    "translation": "Registration failed"
+  },
+  {
+    "id": "error.user_already_exists",
+    "translation": "User already exists"
+  },
+  {
+    "id": "error.invalid_role",
+    "translation": "Invalid role"
+  },
+  {
+    "id": "error.password_reset_failed",
+    "translation": "Password reset failed"
+  },
+  {
+    "id": "success.login_success",
+    "translation": "Login successful"
+  },
+  {
+    "id": "success.logout_success",
+    "translation": "Logout successful"
+  },
+  {
+    "id": "success.registration_success",
+    "translation": "Registration successful"
+  },
+  {
+    "id": "success.token_refreshed",
+    "translation": "Token refreshed successfully"
+  },
+  {
+    "id": "success.access_granted",
+    "translation": "Access granted"
+  },
+  {
+    "id": "success.password_reset_success",
+    "translation": "Password reset successful"
+  }
+]
