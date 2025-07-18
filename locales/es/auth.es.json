@@ -1,0 +1,26 @@
+{
+  "error.reset_token_invalid": "Token de restablecimiento inválido o expirado",
+  "error.reset_token_expired": "Token de restablecimiento ha expirado",
+  "error.failed_forgot_password": "Error al procesar olvido de contraseña",
+  "error.reset_password_failed": "Error al restablecer contraseña",
+  "error.registration_failed": "Registro fallido",
+  "error.login_failed": "Login fallido",
+  "error.session_expired": "Sesión ha expirado",
+
+  "success.reset_email_sent": "Email de restablecimiento enviado exitosamente",
+  "success.password_reset": "Contraseña restablecida exitosamente",
+  "success.reset_password_sent": "Instrucciones de restablecimiento enviadas a su email",
+  "success.login": "Login exitoso",
+  "success.logout": "Logout exitoso", 
+  "success.registration": "Registro exitoso",
+  "success.token_generated": "Token de acceso generado exitosamente",
+  "success.token_refreshed": "Token actualizado exitosamente",
+  
+  "auth.login_success": "¡Bienvenido de vuelta! Has iniciado sesión exitosamente",
+  "auth.registration_success": "¡Cuenta creada exitosamente! Por favor verifica tu email",
+  "auth.logout_success": "Has cerrado sesión exitosamente",
+  "auth.token_about_to_expire": "Tu sesión expirará en {{.Minutes}} minutos",
+  "auth.account_created": "Tu cuenta ha sido creada exitosamente",
+  "auth.password_updated": "Tu contraseña ha sido actualizada exitosamente",
+  "auth.profile_completed": "La configuración de tu perfil está completa"
+}

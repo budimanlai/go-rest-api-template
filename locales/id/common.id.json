@@ -1,0 +1,58 @@
+[
+  {
+    "id": "error.validation_failed",
+    "translation": "Validasi gagal"
+  },
+  {
+    "id": "error.internal_server",
+    "translation": "Terjadi kesalahan server internal"
+  },
+  {
+    "id": "error.database_error",
+    "translation": "Terjadi kesalahan database"
+  },
+  {
+    "id": "error.invalid_request",
+    "translation": "Data permintaan tidak valid"
+  },
+  {
+    "id": "error.invalid_request_body",
+    "translation": "Badan permintaan tidak valid"
+  },
+  {
+    "id": "error.unauthorized",
+    "translation": "Tidak memiliki otorisasi. API key tidak valid"
+  },
+  {
+    "id": "error.forbidden",
+    "translation": "Akses ditolak"
+  },
+  {
+    "id": "error.invalid_api_key",
+    "translation": "API key tidak valid atau tidak aktif"
+  },
+  {
+    "id": "error.api_key_required",
+    "translation": "API key diperlukan"
+  },
+  {
+    "id": "error.bearer_token_required",
+    "translation": "Bearer token diperlukan untuk endpoint privat"
+  },
+  {
+    "id": "error.invalid_token",
+    "translation": "Token tidak valid atau sudah kadaluarsa"
+  },
+  {
+    "id": "error.token_expired",
+    "translation": "Token sudah kadaluarsa"
+  },
+  {
+    "id": "error.insufficient_permissions",
+    "translation": "Hak akses tidak mencukupi"
+  },
+  {
+    "id": "error.rate_limit_exceeded",
+    "translation": "Batas permintaan terlampaui. Silakan coba lagi nanti"
+  }
+]

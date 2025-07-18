@@ -65,7 +65,8 @@ func (c *Container) initI18n() {
 	i18nConfig := i18n.Config{
 		DefaultLanguage: "en",
 		LocalesPath:     "./locales",
-		SupportedLangs:  []string{"en", "id"},
+		SupportedLangs:  []string{"en", "id", "es"},         // Added Spanish support
+		Modules:         []string{"common", "user", "auth"}, // Modular translation files
 	}
 
 	manager, err := i18n.NewManager(i18nConfig)

@@ -60,7 +60,7 @@ func RestApi(c *gocli.Cli) {
 	// Add i18n middleware
 	app.Use(middleware.I18nMiddleware(middleware.I18nConfig{
 		DefaultLanguage: "en",
-		SupportedLangs:  []string{"en", "id"},
+		SupportedLangs:  []string{"en", "id", "es"},
 	}))
 
 	// Initialize dependencies using dependency injection container

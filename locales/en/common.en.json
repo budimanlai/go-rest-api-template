@@ -1,0 +1,58 @@
+[
+  {
+    "id": "error.validation_failed",
+    "translation": "Validation failed"
+  },
+  {
+    "id": "error.internal_server",
+    "translation": "Internal server error"
+  },
+  {
+    "id": "error.database_error",
+    "translation": "Database error occurred"
+  },
+  {
+    "id": "error.invalid_request",
+    "translation": "Invalid request data"
+  },
+  {
+    "id": "error.invalid_request_body",
+    "translation": "Invalid request body"
+  },
+  {
+    "id": "error.unauthorized",
+    "translation": "Unauthorized. Invalid API key"
+  },
+  {
+    "id": "error.forbidden",
+    "translation": "Access forbidden"
+  },
+  {
+    "id": "error.invalid_api_key",
+    "translation": "Invalid or inactive API key"
+  },
+  {
+    "id": "error.api_key_required",
+    "translation": "API key is required"
+  },
+  {
+    "id": "error.bearer_token_required",
+    "translation": "Bearer token is required for private endpoints"
+  },
+  {
+    "id": "error.invalid_token",
+    "translation": "Invalid or expired token"
+  },
+  {
+    "id": "error.token_expired",
+    "translation": "Token has expired"
+  },
+  {
+    "id": "error.insufficient_permissions",
+    "translation": "Insufficient permissions"
+  },
+  {
+    "id": "error.rate_limit_exceeded",
+    "translation": "Rate limit exceeded. Please try again later"
+  }
+]

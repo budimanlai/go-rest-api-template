@@ -1,0 +1,58 @@
+[
+  {
+    "id": "error.validation_failed",
+    "translation": "Validación fallida"
+  },
+  {
+    "id": "error.internal_server",
+    "translation": "Error interno del servidor"
+  },
+  {
+    "id": "error.database_error",
+    "translation": "Se produjo un error en la base de datos"
+  },
+  {
+    "id": "error.invalid_request",
+    "translation": "Datos de solicitud inválidos"
+  },
+  {
+    "id": "error.invalid_request_body",
+    "translation": "Cuerpo de solicitud inválido"
+  },
+  {
+    "id": "error.unauthorized",
+    "translation": "No autorizado. Clave de API inválida"
+  },
+  {
+    "id": "error.forbidden",
+    "translation": "Acceso prohibido"
+  },
+  {
+    "id": "error.invalid_api_key",
+    "translation": "Clave de API inválida o inactiva"
+  },
+  {
+    "id": "error.api_key_required",
+    "translation": "Clave de API requerida"
+  },
+  {
+    "id": "error.bearer_token_required",
+    "translation": "Token Bearer requerido para endpoints privados"
+  },
+  {
+    "id": "error.invalid_token",
+    "translation": "Token inválido o expirado"
+  },
+  {
+    "id": "error.token_expired",
+    "translation": "Token ha expirado"
+  },
+  {
+    "id": "error.insufficient_permissions",
+    "translation": "Permisos insuficientes"
+  },
+  {
+    "id": "error.rate_limit_exceeded",
+    "translation": "Límite de velocidad excedido. Intente más tarde"
+  }
+]

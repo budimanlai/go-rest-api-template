@@ -94,7 +94,7 @@ func PrivateMiddleware(apiKeyService service.ApiKeyService, jwtService service.J
 		// Step 1: Validate API Key first
 		apiKey := c.Get("X-API-Key")
 		if apiKey == "" {
-			return response.BadRequest(c, "API key is required", "")
+			return response.ErrorWithI18n(c, fiber.StatusBadRequest, "api_key_required", nil)
 		}
 
 		// Validate API key

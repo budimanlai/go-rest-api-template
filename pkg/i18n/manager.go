@@ -3,6 +3,7 @@ package i18n
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/nicksnyder/go-i18n/v2/i18n"
@@ -20,6 +21,7 @@ type Config struct {
 	DefaultLanguage string
 	LocalesPath     string
 	SupportedLangs  []string
+	Modules         []string // Optional: specific modules to load (e.g., ["common", "user", "auth"])
 }
 
 // NewManager creates a new i18n manager
@@ -27,14 +29,33 @@ func NewManager(config Config) (*Manager, error) {
 	bundle := i18n.NewBundle(language.English)
 	bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
 
-	// Load message files for each supported language
-	for _, lang := range config.SupportedLangs {
-		filename := fmt.Sprintf("%s.json", lang)
-		filePath := filepath.Join(config.LocalesPath, filename)
+	// Default modules if not specified
+	modules := config.Modules
+	if len(modules) == 0 {
+		modules = []string{"common", "user", "auth"} // Default modules
+	}
 
-		if _, err := bundle.LoadMessageFile(filePath); err != nil {
-			// Log warning but don't fail if file doesn't exist
-			fmt.Printf("Warning: Could not load language file %s: %v\n", filePath, err)
+	// Load message files for each supported language and module
+	for _, lang := range config.SupportedLangs {
+		// Try to load legacy single file first (for backward compatibility)
+		legacyFile := fmt.Sprintf("%s.json", lang)
+		legacyPath := filepath.Join(config.LocalesPath, legacyFile)
+		if _, err := os.Stat(legacyPath); err == nil {
+			if _, err := bundle.LoadMessageFile(legacyPath); err != nil {
+				fmt.Printf("Warning: Could not load legacy language file %s: %v\n", legacyPath, err)
+			}
+			continue // Skip module loading if legacy file exists
+		}
+
+		// Load modular files
+		for _, module := range modules {
+			filename := fmt.Sprintf("%s.%s.json", module, lang)
+			filePath := filepath.Join(config.LocalesPath, lang, filename)
+
+			if _, err := bundle.LoadMessageFile(filePath); err != nil {
+				// Log warning but don't fail if file doesn't exist
+				fmt.Printf("Warning: Could not load language file %s: %v\n", filePath, err)
+			}
 		}
 	}
 
