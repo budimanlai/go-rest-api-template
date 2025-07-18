@@ -11,18 +11,20 @@ import (
 
 // User represents a user entity
 type User struct {
-	ID                int        `json:"id"`
-	Username          string     `json:"username"`
-	Email             string     `json:"email"`
-	PasswordHash      string     `json:"-"`
-	Status            string     `json:"status"`
-	VerificationToken *string    `json:"-"`
-	CreatedAt         time.Time  `json:"created_at"`
-	UpdatedAt         time.Time  `json:"updated_at"`
-	DeletedAt         *time.Time `json:"deleted_at,omitempty"`
-	CreatedBy         *int       `json:"created_by,omitempty"`
-	UpdatedBy         *int       `json:"updated_by,omitempty"`
-	DeletedBy         *int       `json:"deleted_by,omitempty"`
+	ID                 int        `json:"id"`
+	Username           string     `json:"username"`
+	AuthKey            string     `json:"-"`
+	Email              string     `json:"email"`
+	PasswordHash       string     `json:"-"`
+	PasswordResetToken *string    `json:"-"`
+	Status             string     `json:"status"`
+	VerificationToken  *string    `json:"-"`
+	CreatedAt          time.Time  `json:"created_at"`
+	CreatedBy          *int       `json:"created_by,omitempty"`
+	UpdatedAt          *time.Time `json:"updated_at,omitempty"`
+	UpdatedBy          *int       `json:"updated_by,omitempty"`
+	DeletedAt          *time.Time `json:"deleted_at,omitempty"`
+	DeletedBy          *int       `json:"deleted_by,omitempty"`
 }
 
 // Business validation rules

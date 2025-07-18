@@ -7,18 +7,20 @@ import (
 
 // UserModel - Database model (infrastructure concern)
 type UserModel struct {
-	ID                int        `db:"id" json:"id"`
-	Username          string     `db:"username" json:"username"`
-	Email             string     `db:"email" json:"email"`
-	PasswordHash      string     `db:"password_hash" json:"-"`
-	Status            string     `db:"status" json:"status"`
-	VerificationToken *string    `db:"verification_token" json:"-"`
-	CreatedAt         time.Time  `db:"created_at" json:"created_at"`
-	UpdatedAt         time.Time  `db:"updated_at" json:"updated_at"`
-	DeletedAt         *time.Time `db:"deleted_at" json:"deleted_at,omitempty"`
-	CreatedBy         *int       `db:"created_by" json:"created_by,omitempty"`
-	UpdatedBy         *int       `db:"updated_by" json:"updated_by,omitempty"`
-	DeletedBy         *int       `db:"deleted_by" json:"deleted_by,omitempty"`
+	ID                 int        `db:"id" json:"id"`
+	Username           string     `db:"username" json:"username"`
+	AuthKey            string     `db:"auth_key" json:"-"`
+	PasswordHash       string     `db:"password_hash" json:"-"`
+	PasswordResetToken *string    `db:"password_reset_token" json:"-"`
+	Email              string     `db:"email" json:"email"`
+	Status             string     `db:"status" json:"status"`
+	CreatedAt          time.Time  `db:"created_at" json:"created_at"`
+	CreatedBy          *int       `db:"created_by" json:"created_by,omitempty"`
+	UpdatedAt          *time.Time `db:"updated_at" json:"updated_at,omitempty"`
+	UpdatedBy          *int       `db:"updated_by" json:"updated_by,omitempty"`
+	DeletedAt          *time.Time `db:"deleted_at" json:"deleted_at,omitempty"`
+	DeletedBy          *int       `db:"deleted_by" json:"deleted_by,omitempty"`
+	VerificationToken  *string    `db:"verification_token" json:"-"`
 }
 
 // UserCreateRequest - DTO for HTTP requests with comprehensive validation
@@ -61,12 +63,12 @@ type ChangePasswordRequest struct {
 
 // UserResponse - DTO for HTTP responses
 type UserResponse struct {
-	ID        int       `json:"id"`
-	Username  string    `json:"username"`
-	Email     string    `json:"email"`
-	Status    string    `json:"status"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID        int        `json:"id"`
+	Username  string     `json:"username"`
+	Email     string     `json:"email"`
+	Status    string     `json:"status"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt *time.Time `json:"updated_at"`
 }
 
 // Validate validates UserCreateRequest

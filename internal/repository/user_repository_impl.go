@@ -2,10 +2,13 @@ package repository
 
 import (
 	"context"
+	"go-rest-api-template/internal/constant"
 	"go-rest-api-template/internal/domain/entity"
 	"go-rest-api-template/internal/domain/repository"
 	"go-rest-api-template/internal/model"
+	"time"
 
+	common "github.com/budimanlai/go-common"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -20,17 +23,26 @@ func NewUserRepository(db *sqlx.DB) repository.UserRepository {
 }
 
 func (r *userRepositoryImpl) Create(ctx context.Context, user *entity.User) error {
+	now := time.Now()
 	// Convert domain entity to database model
 	userModel := &model.UserModel{
-		Username:     user.Username,
-		Email:        user.Email,
-		PasswordHash: user.PasswordHash,
-		Status:       "active",
-		CreatedBy:    user.CreatedBy,
+		Username:          user.Username,
+		Email:             user.Email,
+		PasswordHash:      user.PasswordHash,
+		VerificationToken: user.VerificationToken,
+		AuthKey:           common.GenerateRandomString(constant.AuthKeyLength),
+		// Set default values
+		CreatedAt: now,
+		UpdatedAt: &now,
+		DeletedAt: nil, // Not deleted initially
+		DeletedBy: nil, // Not deleted initially
+		// Set status to active by default
+		Status:    constant.UserStatusActive,
+		CreatedBy: user.CreatedBy,
 	}
 
-	query := `INSERT INTO user (username, email, password_hash, status, created_by, created_at, updated_at) 
-			  VALUES (:username, :email, :password_hash, :status, :created_by, NOW(), NOW())`
+	query := `INSERT INTO user (username, auth_key, email, password_hash, status, created_by, created_at, updated_at) 
+			  VALUES (:username, :auth_key, :email, :password_hash, :status, :created_by, NOW(), NOW())`
 
 	result, err := r.db.NamedExecContext(ctx, query, userModel)
 	if err != nil {
@@ -55,18 +67,20 @@ func (r *userRepositoryImpl) GetByID(ctx context.Context, id int) (*entity.User,
 
 	// Convert database model to domain entity
 	return &entity.User{
-		ID:                userModel.ID,
-		Username:          userModel.Username,
-		Email:             userModel.Email,
-		PasswordHash:      userModel.PasswordHash,
-		Status:            userModel.Status,
-		VerificationToken: userModel.VerificationToken,
-		CreatedAt:         userModel.CreatedAt,
-		UpdatedAt:         userModel.UpdatedAt,
-		DeletedAt:         userModel.DeletedAt,
-		CreatedBy:         userModel.CreatedBy,
-		UpdatedBy:         userModel.UpdatedBy,
-		DeletedBy:         userModel.DeletedBy,
+		ID:                 userModel.ID,
+		Username:           userModel.Username,
+		Email:              userModel.Email,
+		PasswordHash:       userModel.PasswordHash,
+		PasswordResetToken: userModel.PasswordResetToken,
+		Status:             userModel.Status,
+		VerificationToken:  userModel.VerificationToken,
+		AuthKey:            userModel.AuthKey,
+		CreatedAt:          userModel.CreatedAt,
+		UpdatedAt:          userModel.UpdatedAt,
+		DeletedAt:          userModel.DeletedAt,
+		CreatedBy:          userModel.CreatedBy,
+		UpdatedBy:          userModel.UpdatedBy,
+		DeletedBy:          userModel.DeletedBy,
 	}, nil
 }
 
@@ -80,17 +94,20 @@ func (r *userRepositoryImpl) GetByEmail(ctx context.Context, email string) (*ent
 	}
 
 	return &entity.User{
-		ID:                userModel.ID,
-		Username:          userModel.Username,
-		Email:             userModel.Email,
-		PasswordHash:      userModel.PasswordHash,
-		Status:            userModel.Status,
-		VerificationToken: userModel.VerificationToken,
-		CreatedAt:         userModel.CreatedAt,
-		UpdatedAt:         userModel.UpdatedAt,
-		CreatedBy:         userModel.CreatedBy,
-		UpdatedBy:         userModel.UpdatedBy,
-		DeletedBy:         userModel.DeletedBy,
+		ID:                 userModel.ID,
+		Username:           userModel.Username,
+		Email:              userModel.Email,
+		PasswordHash:       userModel.PasswordHash,
+		PasswordResetToken: userModel.PasswordResetToken,
+		Status:             userModel.Status,
+		VerificationToken:  userModel.VerificationToken,
+		AuthKey:            userModel.AuthKey,
+		CreatedAt:          userModel.CreatedAt,
+		UpdatedAt:          userModel.UpdatedAt,
+		DeletedAt:          userModel.DeletedAt,
+		CreatedBy:          userModel.CreatedBy,
+		UpdatedBy:          userModel.UpdatedBy,
+		DeletedBy:          userModel.DeletedBy,
 	}, nil
 }
 
@@ -104,18 +121,20 @@ func (r *userRepositoryImpl) GetByUsername(ctx context.Context, username string)
 	}
 
 	return &entity.User{
-		ID:                userModel.ID,
-		Username:          userModel.Username,
-		Email:             userModel.Email,
-		PasswordHash:      userModel.PasswordHash,
-		Status:            userModel.Status,
-		VerificationToken: userModel.VerificationToken,
-		CreatedAt:         userModel.CreatedAt,
-		UpdatedAt:         userModel.UpdatedAt,
-		DeletedAt:         userModel.DeletedAt,
-		CreatedBy:         userModel.CreatedBy,
-		UpdatedBy:         userModel.UpdatedBy,
-		DeletedBy:         userModel.DeletedBy,
+		ID:                 userModel.ID,
+		Username:           userModel.Username,
+		Email:              userModel.Email,
+		PasswordHash:       userModel.PasswordHash,
+		PasswordResetToken: userModel.PasswordResetToken,
+		Status:             userModel.Status,
+		VerificationToken:  userModel.VerificationToken,
+		AuthKey:            userModel.AuthKey,
+		CreatedAt:          userModel.CreatedAt,
+		UpdatedAt:          userModel.UpdatedAt,
+		DeletedAt:          userModel.DeletedAt,
+		CreatedBy:          userModel.CreatedBy,
+		UpdatedBy:          userModel.UpdatedBy,
+		DeletedBy:          userModel.DeletedBy,
 	}, nil
 }
 
@@ -137,8 +156,8 @@ func (r *userRepositoryImpl) Update(ctx context.Context, user *entity.User) erro
 }
 
 func (r *userRepositoryImpl) Delete(ctx context.Context, id int) error {
-	query := `UPDATE user SET deleted_at = NOW() WHERE id = ? AND deleted_at IS NULL`
-	_, err := r.db.ExecContext(ctx, query, id)
+	query := `UPDATE user SET deleted_at = NOW(), deleted_by = ? WHERE id = ? AND deleted_at IS NULL`
+	_, err := r.db.ExecContext(ctx, query, constant.DefaultUpdatedBy, id)
 	return err
 }
 
@@ -154,18 +173,20 @@ func (r *userRepositoryImpl) GetAll(ctx context.Context, limit, offset int) ([]*
 	users := make([]*entity.User, len(userModels))
 	for i, userModel := range userModels {
 		users[i] = &entity.User{
-			ID:                userModel.ID,
-			Username:          userModel.Username,
-			Email:             userModel.Email,
-			PasswordHash:      userModel.PasswordHash,
-			Status:            userModel.Status,
-			VerificationToken: userModel.VerificationToken,
-			CreatedAt:         userModel.CreatedAt,
-			UpdatedAt:         userModel.UpdatedAt,
-			DeletedAt:         userModel.DeletedAt,
-			CreatedBy:         userModel.CreatedBy,
-			UpdatedBy:         userModel.UpdatedBy,
-			DeletedBy:         userModel.DeletedBy,
+			ID:                 userModel.ID,
+			Username:           userModel.Username,
+			Email:              userModel.Email,
+			PasswordHash:       userModel.PasswordHash,
+			PasswordResetToken: userModel.PasswordResetToken,
+			Status:             userModel.Status,
+			VerificationToken:  userModel.VerificationToken,
+			AuthKey:            userModel.AuthKey,
+			CreatedAt:          userModel.CreatedAt,
+			UpdatedAt:          userModel.UpdatedAt,
+			DeletedAt:          userModel.DeletedAt,
+			CreatedBy:          userModel.CreatedBy,
+			UpdatedBy:          userModel.UpdatedBy,
+			DeletedBy:          userModel.DeletedBy,
 		}
 	}
 
@@ -189,18 +210,20 @@ func (r *userRepositoryImpl) GetByVerificationToken(ctx context.Context, token s
 	}
 
 	return &entity.User{
-		ID:                userModel.ID,
-		Username:          userModel.Username,
-		Email:             userModel.Email,
-		PasswordHash:      userModel.PasswordHash,
-		Status:            userModel.Status,
-		VerificationToken: userModel.VerificationToken,
-		CreatedAt:         userModel.CreatedAt,
-		UpdatedAt:         userModel.UpdatedAt,
-		DeletedAt:         userModel.DeletedAt,
-		CreatedBy:         userModel.CreatedBy,
-		UpdatedBy:         userModel.UpdatedBy,
-		DeletedBy:         userModel.DeletedBy,
+		ID:                 userModel.ID,
+		Username:           userModel.Username,
+		Email:              userModel.Email,
+		PasswordHash:       userModel.PasswordHash,
+		PasswordResetToken: userModel.PasswordResetToken,
+		Status:             userModel.Status,
+		VerificationToken:  userModel.VerificationToken,
+		AuthKey:            userModel.AuthKey,
+		CreatedAt:          userModel.CreatedAt,
+		UpdatedAt:          userModel.UpdatedAt,
+		DeletedAt:          userModel.DeletedAt,
+		CreatedBy:          userModel.CreatedBy,
+		UpdatedBy:          userModel.UpdatedBy,
+		DeletedBy:          userModel.DeletedBy,
 	}, nil
 }
 
