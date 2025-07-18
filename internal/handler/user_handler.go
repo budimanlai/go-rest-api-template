@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"context"
 	"strconv"
 
 	"go-rest-api-template/internal/constant"
+	"go-rest-api-template/internal/domain/repository"
 	"go-rest-api-template/internal/model"
 	"go-rest-api-template/pkg/response"
 
@@ -11,11 +13,13 @@ import (
 )
 
 type UserHandler struct {
-	// Add dependencies here when needed
+	userRepo repository.UserRepository
 }
 
-func NewUserHandler() *UserHandler {
-	return &UserHandler{}
+func NewUserHandler(userRepo repository.UserRepository) *UserHandler {
+	return &UserHandler{
+		userRepo: userRepo,
+	}
 }
 
 // GetUserByID handles GET /users/:id
@@ -25,12 +29,19 @@ func (h *UserHandler) GetUserByID(c *fiber.Ctx) error {
 		return response.ErrorWithI18n(c, fiber.StatusBadRequest, "invalid_user_id", nil)
 	}
 
-	// Temporary response
+	// Get user from database
+	ctx := context.Background()
+	user, err := h.userRepo.GetByID(ctx, id)
+	if err != nil {
+		return response.ErrorWithI18n(c, fiber.StatusNotFound, "user_not_found", nil)
+	}
+
+	// Convert entity to response model
 	userResponse := &model.UserResponse{
-		ID:       id,
-		Username: "example_user",
-		Email:    "example@email.com",
-		Status:   constant.UserStatusActive,
+		ID:       user.ID,
+		Username: user.Username,
+		Email:    user.Email,
+		Status:   user.Status,
 	}
 
 	return response.SuccessWithI18n(c, "user_retrieved", userResponse, nil)
@@ -75,22 +86,26 @@ func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {
 
 // GetAllUsers handles GET /users
 func (h *UserHandler) GetAllUsers(c *fiber.Ctx) error {
-	users := []model.UserResponse{
-		{
-			ID:       1,
-			Username: "user1",
-			Email:    "user1@email.com",
-			Status:   constant.UserStatusActive,
-		},
-		{
-			ID:       2,
-			Username: "user2",
-			Email:    "user2@email.com",
-			Status:   constant.UserStatusActive,
-		},
+	ctx := context.Background()
+
+	// Get users from database
+	users, err := h.userRepo.GetAll(ctx, 0, 0) // 0 means no limit/offset for now
+	if err != nil {
+		return response.ErrorWithI18n(c, fiber.StatusInternalServerError, "failed_to_get_users", nil)
 	}
 
-	return response.SuccessWithI18n(c, "users_retrieved", users, nil)
+	// Convert entities to response models
+	userResponses := make([]model.UserResponse, len(users))
+	for i, user := range users {
+		userResponses[i] = model.UserResponse{
+			ID:       user.ID,
+			Username: user.Username,
+			Email:    user.Email,
+			Status:   user.Status,
+		}
+	}
+
+	return response.SuccessWithI18n(c, "users_retrieved", userResponses, nil)
 }
 
 // ForgotPassword handles POST /users/forgot-password

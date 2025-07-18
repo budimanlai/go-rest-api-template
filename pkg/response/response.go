@@ -78,10 +78,12 @@ func ErrorWithI18n(c *fiber.Ctx, status int, errorKey string, templateData map[s
 		return GlobalI18nResponseHelper.ErrorWithI18n(c, status, errorKey, templateData)
 	}
 	// Fallback to regular response
-	return c.Status(status).JSON(StandardResponse{
-		Success: false,
-		Message: errorKey,
-		Error:   errorKey,
+	return c.Status(status).JSON(fiber.Map{
+		"data": nil,
+		"meta": fiber.Map{
+			"success": false,
+			"message": errorKey,
+		},
 	})
 }
 
@@ -160,10 +162,12 @@ func (h *I18nResponseHelper) SuccessWithI18n(c *fiber.Ctx, messageKey string, da
 	lang := getLanguageFromContext(c)
 	message := h.i18nManager.TranslateSuccess(lang, messageKey, templateData)
 
-	return c.Status(fiber.StatusOK).JSON(StandardResponse{
-		Success: true,
-		Message: message,
-		Data:    data,
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"data": data,
+		"meta": fiber.Map{
+			"success": true,
+			"message": message,
+		},
 	})
 }
 
@@ -175,10 +179,12 @@ func (h *I18nResponseHelper) ErrorWithI18n(c *fiber.Ctx, status int, errorKey st
 	lang := getLanguageFromContext(c)
 	message := h.i18nManager.TranslateError(lang, errorKey, templateData)
 
-	return c.Status(status).JSON(StandardResponse{
-		Success: false,
-		Message: message,
-		Error:   errorKey,
+	return c.Status(status).JSON(fiber.Map{
+		"data": nil,
+		"meta": fiber.Map{
+			"success": false,
+			"message": message,
+		},
 	})
 }
 
@@ -187,10 +193,12 @@ func (h *I18nResponseHelper) CreatedWithI18n(c *fiber.Ctx, messageKey string, da
 	lang := getLanguageFromContext(c)
 	message := h.i18nManager.TranslateSuccess(lang, messageKey, templateData)
 
-	return c.Status(fiber.StatusCreated).JSON(StandardResponse{
-		Success: true,
-		Message: message,
-		Data:    data,
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"data": data,
+		"meta": fiber.Map{
+			"success": true,
+			"message": message,
+		},
 	})
 }
 
@@ -204,27 +212,31 @@ func (h *I18nResponseHelper) ValidationErrorWithI18n(c *fiber.Ctx, errors []Vali
 
 	lang := getLanguageFromContext(c)
 
-	// Translate each validation error
-	translatedErrors := make([]ValidationError, len(errors))
+	// Translate each validation error and simplify structure
+	simplifiedErrors := make([]map[string]string, len(errors))
 	for i, err := range errors {
-		translatedErrors[i] = ValidationError{
-			Field: h.i18nManager.Translate(lang, "field."+err.Field, nil),
-			Message: h.i18nManager.Translate(lang, "validation."+err.Tag, map[string]interface{}{
+		simplifiedErrors[i] = map[string]string{
+			"field": h.i18nManager.Translate(lang, "field."+err.Field, nil),
+			"message": h.i18nManager.Translate(lang, "validation."+err.Tag, map[string]interface{}{
 				"Field":     h.i18nManager.Translate(lang, "field."+err.Field, nil),
 				"MinLength": err.Param,
 				"MaxLength": err.Param,
 			}),
-			Tag:   err.Tag,
-			Param: err.Param,
 		}
 	}
 
 	message := h.i18nManager.TranslateError(lang, "validation_failed", nil)
 
-	return c.Status(fiber.StatusBadRequest).JSON(StandardResponse{
-		Success: false,
-		Message: message,
-		Data:    translatedErrors,
+	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		"data": nil,
+		"meta": fiber.Map{
+			"success": false,
+			"message": message,
+			"errors": fiber.Map{
+				"total_errors":      len(simplifiedErrors),
+				"validation_errors": simplifiedErrors,
+			},
+		},
 	})
 }
 
@@ -238,10 +250,12 @@ func getLanguageFromContext(c *fiber.Ctx) string {
 
 // SendSuccess sends successful response
 func SendSuccess(c *fiber.Ctx, message string, data interface{}) error {
-	return c.Status(fiber.StatusOK).JSON(StandardResponse{
-		Success: true,
-		Message: message,
-		Data:    data,
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"data": data,
+		"meta": fiber.Map{
+			"success": true,
+			"message": message,
+		},
 	})
 }
 
@@ -254,25 +268,24 @@ func SendError(c *fiber.Ctx, statusCode int, message string, err error) error {
 	}
 	logErrorWithCaller(statusCode, message, templateData)
 
-	response := StandardResponse{
-		Success: false,
-		Message: message,
-	}
-
-	if err != nil {
-		response.Error = err.Error()
-	}
-
-	return c.Status(statusCode).JSON(response)
+	return c.Status(statusCode).JSON(fiber.Map{
+		"data": nil,
+		"meta": fiber.Map{
+			"success": false,
+			"message": message,
+		},
+	})
 }
 
 // SendPaginated sends paginated response
 func SendPaginated(c *fiber.Ctx, message string, data interface{}, pagination Pagination) error {
-	return c.Status(fiber.StatusOK).JSON(PaginatedResponse{
-		Success:    true,
-		Message:    message,
-		Data:       data,
-		Pagination: pagination,
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"data": data,
+		"meta": fiber.Map{
+			"success":    true,
+			"message":    message,
+			"pagination": pagination,
+		},
 	})
 }
 
@@ -285,10 +298,12 @@ func Success(c *fiber.Ctx, message string, data interface{}) error {
 
 // Created sends 201 Created response
 func Created(c *fiber.Ctx, message string, data interface{}) error {
-	return c.Status(fiber.StatusCreated).JSON(StandardResponse{
-		Success: true,
-		Message: message,
-		Data:    data,
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"data": data,
+		"meta": fiber.Map{
+			"success": true,
+			"message": message,
+		},
 	})
 }
 
@@ -301,10 +316,12 @@ func BadRequest(c *fiber.Ctx, message string, err string) error {
 	}
 	logErrorWithCaller(fiber.StatusBadRequest, message, templateData)
 
-	return c.Status(fiber.StatusBadRequest).JSON(StandardResponse{
-		Success: false,
-		Message: message,
-		Error:   err,
+	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		"data": nil,
+		"meta": fiber.Map{
+			"success": false,
+			"message": message,
+		},
 	})
 }
 
@@ -317,10 +334,12 @@ func NotFound(c *fiber.Ctx, message string, err string) error {
 	}
 	logErrorWithCaller(fiber.StatusNotFound, message, templateData)
 
-	return c.Status(fiber.StatusNotFound).JSON(StandardResponse{
-		Success: false,
-		Message: message,
-		Error:   err,
+	return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+		"data": nil,
+		"meta": fiber.Map{
+			"success": false,
+			"message": message,
+		},
 	})
 }
 
@@ -333,10 +352,12 @@ func InternalServerError(c *fiber.Ctx, message string, err string) error {
 	}
 	logErrorWithCaller(fiber.StatusInternalServerError, message, templateData)
 
-	return c.Status(fiber.StatusInternalServerError).JSON(StandardResponse{
-		Success: false,
-		Message: message,
-		Error:   err,
+	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		"data": nil,
+		"meta": fiber.Map{
+			"success": false,
+			"message": message,
+		},
 	})
 }
 

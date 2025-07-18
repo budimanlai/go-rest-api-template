@@ -2,7 +2,10 @@ package handler_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
+	"go-rest-api-template/internal/domain/entity"
 	"go-rest-api-template/internal/handler"
 	"go-rest-api-template/internal/model"
 	"go-rest-api-template/pkg/i18n"
@@ -14,6 +17,95 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/stretchr/testify/assert"
 )
+
+// MockUserRepository is a mock implementation of UserRepository for testing
+type MockUserRepository struct {
+	users map[int]*entity.User
+}
+
+func NewMockUserRepository() *MockUserRepository {
+	return &MockUserRepository{
+		users: make(map[int]*entity.User),
+	}
+}
+
+func (m *MockUserRepository) Create(ctx context.Context, user *entity.User) error {
+	user.ID = len(m.users) + 1
+	m.users[user.ID] = user
+	return nil
+}
+
+func (m *MockUserRepository) GetByID(ctx context.Context, id int) (*entity.User, error) {
+	user, exists := m.users[id]
+	if !exists {
+		return nil, errors.New("user not found")
+	}
+	return user, nil
+}
+
+func (m *MockUserRepository) GetByEmail(ctx context.Context, email string) (*entity.User, error) {
+	for _, user := range m.users {
+		if user.Email == email {
+			return user, nil
+		}
+	}
+	return nil, errors.New("user not found")
+}
+
+func (m *MockUserRepository) GetByUsername(ctx context.Context, username string) (*entity.User, error) {
+	for _, user := range m.users {
+		if user.Username == username {
+			return user, nil
+		}
+	}
+	return nil, errors.New("user not found")
+}
+
+func (m *MockUserRepository) Update(ctx context.Context, user *entity.User) error {
+	if _, exists := m.users[user.ID]; !exists {
+		return errors.New("user not found")
+	}
+	m.users[user.ID] = user
+	return nil
+}
+
+func (m *MockUserRepository) Delete(ctx context.Context, id int) error {
+	if _, exists := m.users[id]; !exists {
+		return errors.New("user not found")
+	}
+	delete(m.users, id)
+	return nil
+}
+
+func (m *MockUserRepository) GetAll(ctx context.Context, limit, offset int) ([]*entity.User, error) {
+	users := make([]*entity.User, 0, len(m.users))
+	for _, user := range m.users {
+		users = append(users, user)
+	}
+	return users, nil
+}
+
+func (m *MockUserRepository) GetCount(ctx context.Context) (int, error) {
+	return len(m.users), nil
+}
+
+func (m *MockUserRepository) GetByVerificationToken(ctx context.Context, token string) (*entity.User, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (m *MockUserRepository) UpdateVerificationToken(ctx context.Context, user *entity.User) error {
+	return errors.New("not implemented")
+}
+
+// Add test user to mock repository
+func (m *MockUserRepository) AddTestUser(id int, username, email, status string) {
+	m.users[id] = &entity.User{
+		ID:       id,
+		Username: username,
+		Email:    email,
+		Status:   status,
+	}
+}
 
 // createTestResponseHelper creates a response helper for testing with minimal i18n setup
 func createTestResponseHelper() *response.I18nResponseHelper {
@@ -58,8 +150,9 @@ func TestUserHandler_CreateUser(t *testing.T) {
 	// Setup global helpers first
 	setupTestGlobalHelpers()
 
-	// Setup
-	userHandler := handler.NewUserHandler()
+	// Setup mock repository
+	mockRepo := NewMockUserRepository()
+	userHandler := handler.NewUserHandler(mockRepo)
 
 	app := fiber.New()
 	app.Post("/users", userHandler.CreateUser)
@@ -88,8 +181,10 @@ func TestUserHandler_GetUserByID(t *testing.T) {
 	// Setup global helpers first
 	setupTestGlobalHelpers()
 
-	// Setup
-	userHandler := handler.NewUserHandler()
+	// Setup mock repository with test data
+	mockRepo := NewMockUserRepository()
+	mockRepo.AddTestUser(1, "testuser", "test@example.com", "active")
+	userHandler := handler.NewUserHandler(mockRepo)
 
 	app := fiber.New()
 	app.Get("/users/:id", userHandler.GetUserByID)
@@ -109,8 +204,9 @@ func TestUserHandler_GetAllUsers(t *testing.T) {
 	// Setup global helpers first
 	setupTestGlobalHelpers()
 
-	// Setup
-	userHandler := handler.NewUserHandler()
+	// Setup mock repository
+	mockRepo := NewMockUserRepository()
+	userHandler := handler.NewUserHandler(mockRepo)
 
 	app := fiber.New()
 	app.Get("/users", userHandler.GetAllUsers)
